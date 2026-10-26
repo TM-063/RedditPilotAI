@@ -8,20 +8,27 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
 <style>
-:root{--bg:#030a12;--panel:rgba(8,24,40,.72);--line:rgba(61,224,255,.28);--cy:#3de0ff;--cy2:#00a8ff;--ink:#d8f4ff;--muted:#7fa6b8;--warn:#ffb347;--bad:#ff7a7a;--ok:#4dffb0;--head:"Orbitron","Segoe UI",system-ui,sans-serif}
+:root,html[data-theme="jarvis"]{--rgb:255,160,50;--rgb2:255,110,20;--cy:#ffa032;--bg:#0d0703;--panel:rgba(30,16,6,.72);--sheet:#1a0e05;--ink:#fff1e0;--muted:#b8987a;--g1:#ffe0b0;--g2:#ffa032;--g3:#ff6a00;--glow:rgba(255,120,20,.24)}
+html[data-theme="friday"]{--rgb:61,224,255;--rgb2:0,168,255;--cy:#3de0ff;--bg:#030a12;--panel:rgba(8,24,40,.72);--sheet:#061423;--ink:#d8f4ff;--muted:#7fa6b8;--g1:#aef4ff;--g2:#3de0ff;--g3:#00a8ff;--glow:rgba(0,168,255,.24)}
+html[data-theme="ultron"]{--rgb:255,70,70;--rgb2:210,20,40;--cy:#ff4444;--bg:#0d0305;--panel:rgba(34,8,12,.72);--sheet:#1c070b;--ink:#ffe4e4;--muted:#b88a8a;--g1:#ffc0c0;--g2:#ff4444;--g3:#b00020;--glow:rgba(220,30,50,.26)}
+:root{--line:rgba(var(--rgb),.28);--warn:#ffd166;--bad:#ff8a8a;--ok:#4dffb0;--head:"Orbitron","Segoe UI",system-ui,sans-serif}
 *{box-sizing:border-box}
 html{scroll-behavior:smooth}
-body{margin:0;font-family:system-ui,-apple-system,sans-serif;color:var(--ink);padding-bottom:90px;min-height:100vh;background-color:var(--bg);background-image:radial-gradient(ellipse at 50% -10%,rgba(0,168,255,.24),transparent 55%),linear-gradient(rgba(61,224,255,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(61,224,255,.05) 1px,transparent 1px);background-size:auto,36px 36px,36px 36px;background-attachment:fixed}
-button{font-family:inherit;transition:transform .2s ease,box-shadow .25s ease,background .25s ease,opacity .25s ease,border-color .25s ease}
+body{margin:0;font-family:system-ui,-apple-system,sans-serif;color:var(--ink);padding-bottom:90px;min-height:100vh;background-color:var(--bg);background-image:radial-gradient(ellipse at 50% -10%,var(--glow),transparent 55%),linear-gradient(rgba(var(--rgb),.05) 1px,transparent 1px),linear-gradient(90deg,rgba(var(--rgb),.05) 1px,transparent 1px);background-size:auto,36px 36px,36px 36px;background-attachment:fixed}
+button,select{font-family:inherit;transition:transform .2s ease,box-shadow .25s ease,background .25s ease,opacity .25s ease,border-color .25s ease}
 button:active{transform:scale(.97)}
 .mono{font-family:ui-monospace,Menlo,monospace;letter-spacing:.14em;text-transform:uppercase;font-size:11px;color:var(--muted)}
-.gtext{background:linear-gradient(90deg,#aef4ff,#3de0ff,#00a8ff);-webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-fill-color:transparent}
-.top{display:flex;justify-content:space-between;align-items:center;padding:14px 16px;border-bottom:1px solid var(--line);background:rgba(3,10,18,.7);backdrop-filter:blur(8px)}
+.gtext{background:linear-gradient(90deg,var(--g1),var(--g2),var(--g3));-webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-fill-color:transparent}
+.top{display:flex;justify-content:space-between;align-items:center;padding:14px 16px;border-bottom:1px solid var(--line);background:rgba(0,0,0,.35);backdrop-filter:blur(8px)}
 .logo{display:flex;align-items:center;gap:10px;font-family:var(--head);font-weight:700;font-size:15px;letter-spacing:.08em}
-.logo i{width:30px;height:30px;border-radius:50%;border:2px solid var(--cy);box-shadow:0 0 12px var(--cy),inset 0 0 8px rgba(61,224,255,.6);position:relative;display:block}
+.logo i{width:30px;height:30px;border-radius:50%;border:2px solid var(--cy);box-shadow:0 0 12px var(--cy),inset 0 0 8px rgba(var(--rgb),.6);position:relative;display:block}
 .logo i:after{content:"";position:absolute;inset:8px;border-radius:50%;background:var(--cy);box-shadow:0 0 10px var(--cy)}
+html[data-theme="friday"] .logo i{border-radius:9px}
+html[data-theme="friday"] .logo i:after{border-radius:3px}
+html[data-theme="ultron"] .logo i{border-radius:3px;transform:rotate(45deg);width:26px;height:26px;margin:2px}
+html[data-theme="ultron"] .logo i:after{border-radius:2px}
 .logo b{color:var(--cy)}
-.pill{border:1px solid rgba(255,179,71,.45);border-radius:20px;padding:6px 11px;font-size:11px;color:var(--warn);background:rgba(255,179,71,.07);white-space:nowrap;letter-spacing:.06em;text-transform:uppercase}
+.pill{border:1px solid rgba(255,209,102,.45);border-radius:20px;padding:6px 11px;font-size:11px;color:var(--warn);background:rgba(255,209,102,.07);white-space:nowrap;letter-spacing:.06em;text-transform:uppercase}
 main{padding:20px 16px}
 main.page{animation:fadeUp .45s cubic-bezier(.2,.8,.2,1)}
 h1{font-family:var(--head);font-size:28px;line-height:1.2;margin:14px 0 14px;letter-spacing:.06em;text-transform:uppercase}
@@ -35,65 +42,83 @@ p{color:var(--muted);line-height:1.55;margin:6px 0}
 .link{color:var(--cy);font-weight:600;background:none;border:0;padding:8px 0;font-size:14px;text-decoration:none;display:inline-block}
 .back{color:var(--cy);font-weight:600;background:none;border:0;padding:0 0 14px;font-size:15px}
 .row{display:flex;justify-content:space-between;align-items:center;gap:10px}
-.tag{border-radius:4px;padding:4px 9px;border:1px solid rgba(255,179,71,.45);background:rgba(255,179,71,.08);color:var(--warn);font-size:10.5px;font-family:ui-monospace,Menlo,monospace;letter-spacing:.08em;text-transform:uppercase;white-space:nowrap}
+.tag{border-radius:4px;padding:4px 9px;border:1px solid rgba(255,209,102,.45);background:rgba(255,209,102,.08);color:var(--warn);font-size:10.5px;font-family:ui-monospace,Menlo,monospace;letter-spacing:.08em;text-transform:uppercase;white-space:nowrap}
 .tag.ok{border-color:rgba(77,255,176,.5);background:rgba(77,255,176,.08);color:var(--ok)}
-.tag.info{border-color:var(--line);background:rgba(61,224,255,.08);color:var(--cy)}
+.tag.info{border-color:var(--line);background:rgba(var(--rgb),.08);color:var(--cy)}
 .item{padding:14px 0;border-top:1px solid var(--line)}
 .item:first-of-type{border-top:0}
 .foot{font-size:13px;color:var(--muted);margin-top:24px}
-textarea{width:100%;min-height:140px;margin-top:10px;padding:12px;border:1px solid var(--line);border-radius:4px;font-size:15px;font-family:inherit;background:rgba(0,10,20,.6);color:var(--ink);resize:vertical;transition:border-color .25s,box-shadow .25s}
-textarea:focus{outline:none;border-color:var(--cy);box-shadow:0 0 14px rgba(61,224,255,.25)}
-.btn{border:1px solid var(--cy);border-radius:4px;padding:11px 16px;font-size:13px;background:rgba(0,168,255,.2);color:#eaffff;margin-top:10px;margin-right:8px;letter-spacing:.1em;text-transform:uppercase}
+.err{color:var(--bad)}
+textarea,input[type=text]{width:100%;margin-top:10px;padding:12px;border:1px solid var(--line);border-radius:4px;font-size:15px;font-family:inherit;background:rgba(0,0,0,.4);color:var(--ink);transition:border-color .25s,box-shadow .25s}
+textarea{min-height:140px;resize:vertical}
+textarea:focus,input[type=text]:focus{outline:none;border-color:var(--cy);box-shadow:0 0 14px rgba(var(--rgb),.25)}
+.btn{border:1px solid var(--cy);border-radius:4px;padding:11px 16px;font-size:13px;background:rgba(var(--rgb2),.2);color:var(--ink);margin-top:10px;margin-right:8px;letter-spacing:.1em;text-transform:uppercase}
 .btn.alt{background:transparent;color:var(--muted);border-color:var(--line)}
 .hero{min-height:80vh;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:12px 8px}
 .hero p{max-width:420px;font-size:16px}
-.reactor{width:180px;height:180px;position:relative;margin:0 auto 22px}
-.reactor span{position:absolute;border-radius:50%}
-.reactor .r1{inset:0;border:2px solid rgba(61,224,255,.5);box-shadow:0 0 28px rgba(61,224,255,.35),inset 0 0 26px rgba(61,224,255,.2)}
-.reactor .r2{inset:16px;border:2px dashed rgba(61,224,255,.6);animation:spin 16s linear infinite}
-.reactor .r3{inset:36px;border:3px solid rgba(61,224,255,.85);border-top-color:transparent;border-bottom-color:transparent;animation:spin 7s linear infinite reverse}
-.reactor .r4{inset:62px;background:radial-gradient(circle,#fff 0%,#a8f3ff 35%,rgba(61,224,255,.25) 70%,transparent 72%);box-shadow:0 0 44px 10px rgba(61,224,255,.55);animation:pulse 3.4s ease-in-out infinite}
-.cta,.gen{border:1px solid var(--cy);border-radius:4px;color:#eaffff;background:linear-gradient(135deg,rgba(0,168,255,.4),rgba(61,224,255,.14));box-shadow:0 0 20px rgba(61,224,255,.3);letter-spacing:.16em;text-transform:uppercase;font-weight:700}
+.icon{width:180px;height:180px;position:relative;margin:0 auto 22px}
+.icon span{position:absolute;border-radius:50%}
+.icon .r1{inset:0;border:2px solid rgba(var(--rgb),.5);box-shadow:0 0 28px rgba(var(--rgb),.35),inset 0 0 26px rgba(var(--rgb),.2)}
+.icon .r2{inset:16px;border:2px dashed rgba(var(--rgb),.6);animation:spin 16s linear infinite}
+.icon .r3{inset:36px;border:3px solid rgba(var(--rgb),.85);border-top-color:transparent;border-bottom-color:transparent;animation:spin 7s linear infinite reverse}
+.icon .r4{inset:62px;background:radial-gradient(circle,#fff 0%,var(--g1) 35%,rgba(var(--rgb),.25) 70%,transparent 72%);box-shadow:0 0 44px 10px rgba(var(--rgb),.55);animation:pulse 3.4s ease-in-out infinite}
+.icon .f1{inset:0;border:2px solid rgba(var(--rgb),.5);box-shadow:0 0 28px rgba(var(--rgb),.35),inset 0 0 26px rgba(var(--rgb),.2)}
+.icon .f2{inset:22px;border:1px solid rgba(var(--rgb),.45)}
+.icon .f3{inset:22px;background:conic-gradient(from 0deg,rgba(var(--rgb),.55),rgba(var(--rgb),0) 60%);animation:spin 4.5s linear infinite}
+.icon .f4{inset:82px;background:var(--cy);box-shadow:0 0 22px 6px rgba(var(--rgb),.7);animation:pulse 3s ease-in-out infinite}
+.icon .u1{inset:20px;border:2px solid rgba(var(--rgb),.85);border-radius:6px;transform:rotate(45deg);box-shadow:0 0 30px rgba(var(--rgb),.45),inset 0 0 20px rgba(var(--rgb),.25)}
+.icon .u2{inset:48px;border:2px solid rgba(var(--rgb),.6);border-radius:4px;animation:spin45 9s linear infinite reverse}
+.icon .u3{inset:68px;background:radial-gradient(circle,#fff 0%,var(--g1) 30%,rgba(var(--rgb),.3) 70%,transparent 72%);box-shadow:0 0 44px 10px rgba(var(--rgb),.6);animation:pulse 2.6s ease-in-out infinite}
+.cta,.gen{border:1px solid var(--cy);border-radius:4px;color:var(--ink);background:linear-gradient(135deg,rgba(var(--rgb2),.4),rgba(var(--rgb),.14));box-shadow:0 0 20px rgba(var(--rgb),.3);letter-spacing:.16em;text-transform:uppercase;font-weight:700}
 .cta{padding:16px 38px;font-size:15px;margin-top:22px}
 .gen{width:100%;padding:14px;font-size:14px;margin:4px 0 10px}
-.cta:hover,.gen:hover{box-shadow:0 0 30px rgba(61,224,255,.5)}
+.cta:hover,.gen:hover{box-shadow:0 0 30px rgba(var(--rgb),.5)}
 .gen:disabled{opacity:.4;box-shadow:none}
-.chat{padding:14px;margin:14px 0;box-shadow:0 0 34px rgba(0,168,255,.16)}
+.themes{display:flex;gap:8px;justify-content:center;margin-top:20px;flex-wrap:wrap}
+.tbtn{border:1px solid var(--line);background:transparent;color:var(--muted);border-radius:4px;padding:9px 13px;font-size:12px;letter-spacing:.14em}
+.tbtn.on{border-color:var(--cy);color:var(--cy);box-shadow:0 0 14px rgba(var(--rgb),.3)}
+.chat{padding:14px;margin:14px 0;box-shadow:0 0 34px rgba(var(--rgb2),.16)}
 .chead{display:flex;justify-content:space-between;align-items:flex-start;position:relative}
-.picker{border:1px solid var(--line);background:rgba(61,224,255,.07);border-radius:4px;padding:8px 12px;font-size:14px;font-weight:600;color:var(--cy);margin-top:4px}
-.plist{position:absolute;top:62px;left:0;background:#07182a;border:1px solid var(--line);border-radius:6px;box-shadow:0 12px 30px rgba(0,0,0,.5),0 0 20px rgba(61,224,255,.15);z-index:4;min-width:260px;overflow:hidden;opacity:0;transform:translateY(-8px);pointer-events:none;transition:opacity .22s ease,transform .22s ease}
+.picker{border:1px solid var(--line);background:rgba(var(--rgb),.07);border-radius:4px;padding:8px 12px;font-size:14px;font-weight:600;color:var(--cy);margin-top:4px}
+.plist{position:absolute;top:62px;left:0;background:var(--sheet);border:1px solid var(--line);border-radius:6px;box-shadow:0 12px 30px rgba(0,0,0,.5),0 0 20px rgba(var(--rgb),.15);z-index:4;min-width:270px;max-height:300px;overflow:auto;opacity:0;transform:translateY(-8px);pointer-events:none;transition:opacity .22s ease,transform .22s ease}
 .plist.open{opacity:1;transform:none;pointer-events:auto}
 .plist button{display:flex;justify-content:space-between;gap:12px;width:100%;padding:13px 14px;border:0;border-bottom:1px solid var(--line);background:transparent;font-size:15px;color:var(--ink);text-align:left}
-.plist button.on{background:rgba(61,224,255,.12);color:var(--cy)}
-.log{min-height:170px;max-height:52vh;overflow-y:auto;padding:12px 2px;display:flex;flex-direction:column;gap:10px;scroll-behavior:smooth}
+.plist button.on{background:rgba(var(--rgb),.12);color:var(--cy)}
+.log{min-height:150px;max-height:62vh;overflow-y:auto;padding:12px 2px;display:flex;flex-direction:column;gap:12px;scroll-behavior:smooth}
 .empty{margin:auto;text-align:center;padding:20px 8px}
 .msg{max-width:92%;padding:10px 13px;line-height:1.5;font-size:15px;white-space:pre-wrap;word-wrap:break-word}
-.msg.pop{animation:fadeUp .3s cubic-bezier(.2,.8,.2,1)}
-.msg.user{align-self:flex-end;background:rgba(0,168,255,.18);border:1px solid var(--line);color:#eaffff;border-radius:10px 10px 2px 10px}
+.msg.pop,.result.pop{animation:fadeUp .3s cubic-bezier(.2,.8,.2,1)}
+.msg.user{align-self:flex-end;background:rgba(var(--rgb2),.18);border:1px solid var(--line);color:var(--ink);border-radius:10px 10px 2px 10px}
 .msg.ai{align-self:flex-start;background:rgba(255,255,255,.04);border-left:2px solid var(--cy);color:var(--ink);border-radius:2px 10px 10px 10px}
 .msg.note{align-self:center;color:var(--muted);font-size:13px;text-align:center}
 .msg.bad{color:var(--bad)}
 .msg.pend:after{content:"";animation:dots 1.3s steps(1) infinite}
-.mrow{align-self:flex-start;display:flex;gap:8px;align-items:center;margin-top:-4px}
-.mini{border:1px solid var(--line);background:transparent;border-radius:4px;padding:5px 10px;font-size:12px;color:var(--cy)}
+.result{align-self:stretch;border:1px solid var(--line);border-radius:6px;background:rgba(255,255,255,.03);padding:12px}
+.result .notes{font-size:13px;white-space:pre-wrap;margin:0 0 8px}
+.sec{padding:10px 0;border-top:1px solid var(--line)}
+.sec:first-of-type{border-top:0;padding-top:0}
+.sechead{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.sectext{white-space:pre-wrap;word-wrap:break-word;line-height:1.55;font-size:15px}
+.mrow{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:10px}
+.mini{border:1px solid var(--line);background:transparent;border-radius:4px;padding:6px 10px;font-size:12px;color:var(--cy)}
+select.mini option{background:var(--sheet);color:var(--ink)}
 .cnote{margin:4px 0 8px}
 .cnote p{margin:4px 0;font-size:13px}
-.inrow{display:flex;gap:8px;align-items:flex-end;border:1px solid var(--line);border-radius:6px;padding:8px;background:rgba(0,10,20,.6);transition:border-color .25s,box-shadow .25s}
-.inrow:focus-within{border-color:var(--cy);box-shadow:0 0 14px rgba(61,224,255,.22)}
-.cin{flex:1;width:auto;border:0;background:transparent;min-height:44px;max-height:140px;margin:0;padding:8px;resize:none;outline:none;box-shadow:none;border-radius:0}
+.inrow{border:1px solid var(--line);border-radius:6px;padding:4px 8px;background:rgba(0,0,0,.4);transition:border-color .25s,box-shadow .25s}
+.inrow:focus-within{border-color:var(--cy);box-shadow:0 0 14px rgba(var(--rgb),.22)}
+.cin{width:100%;border:0;background:transparent;min-height:44px;max-height:120px;margin:0;padding:8px 2px;resize:none;outline:none;box-shadow:none;border-radius:0}
 .cin:focus{box-shadow:none}
-.send{width:44px;height:44px;border-radius:4px;border:1px solid var(--cy);background:rgba(0,168,255,.3);color:#fff;font-size:20px;flex:none}
-.send:disabled{opacity:.35}
-#fab{position:fixed;right:16px;bottom:16px;width:58px;height:58px;border-radius:50%;background:rgba(3,10,18,.85);border:2px solid var(--cy);color:var(--cy);font-size:22px;box-shadow:0 0 20px rgba(61,224,255,.4)}
+#fab{position:fixed;right:16px;bottom:16px;width:58px;height:58px;border-radius:50%;background:rgba(0,0,0,.8);border:2px solid var(--cy);color:var(--cy);font-size:22px;box-shadow:0 0 20px rgba(var(--rgb),.4)}
 #menu{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:5}
 #menu.open{display:block;animation:fadeIn .22s ease}
-#sheet{position:absolute;bottom:0;left:0;right:0;background:#061423;border-top:1px solid var(--cy);box-shadow:0 -10px 40px rgba(61,224,255,.18);border-radius:14px 14px 0 0;padding:14px 16px 24px;max-height:80%;overflow:auto;animation:sheetUp .3s cubic-bezier(.2,.8,.2,1)}
-#sheet button{display:block;width:100%;text-align:left;padding:14px 8px;border:0;border-bottom:1px solid rgba(61,224,255,.14);background:none;font-size:15px;color:var(--ink);letter-spacing:.04em}
+#sheet{position:absolute;bottom:0;left:0;right:0;background:var(--sheet);border-top:1px solid var(--cy);box-shadow:0 -10px 40px rgba(var(--rgb),.18);border-radius:14px 14px 0 0;padding:14px 16px 24px;max-height:80%;overflow:auto;animation:sheetUp .3s cubic-bezier(.2,.8,.2,1)}
+#sheet button{display:block;width:100%;text-align:left;padding:14px 8px;border:0;border-bottom:1px solid var(--line);background:none;font-size:15px;color:var(--ink);letter-spacing:.04em}
 #sheet button.on{color:var(--cy);font-weight:700}
 @keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
 @keyframes fadeIn{from{opacity:0}to{opacity:1}}
 @keyframes sheetUp{from{opacity:0;transform:translateY(40px)}to{opacity:1;transform:none}}
 @keyframes spin{to{transform:rotate(360deg)}}
+@keyframes spin45{from{transform:rotate(45deg)}to{transform:rotate(405deg)}}
 @keyframes pulse{50%{opacity:.78;transform:scale(.93)}}
 @keyframes dots{0%{content:""}25%{content:"."}50%{content:".."}75%{content:"..."}}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
@@ -109,16 +134,70 @@ textarea:focus{outline:none;border-color:var(--cy);box-shadow:0 0 14px rgba(61,2
 <div id="menu" onclick="toggleMenu()"><div id="sheet" onclick="event.stopPropagation()"></div></div>
 <script>
 const AGENT_URL="https://redditpilot-agent.subsbooster123.workers.dev/";
-const pages=["Dashboard","AI Agent","Post Generator","Comment Generator","Subreddit Research","Content Discovery","Pending Content","Account Safety","Analytics","Activity History","Notifications","Settings"];
-const SUBS=["AppliedBiology","FemaleLifespan","HumanBiohacking","BiohackingForBeginner","PeptideBiotech"];
+const pages=["Dashboard","AI Agent","Post Generator","Subreddit Research","Content Discovery","Pending Content","Account Safety","Analytics","Activity History","Notifications","Settings"];
+const DEFAULT_SUBS=["AppliedBiology","FemaleLifespan","HumanBiohacking","BiohackingForBeginner","PeptideBiotech"];
+const THEMES={jarvis:{name:"JARVIS",line:"At your service."},friday:{name:"FRIDAY",line:"Systems online."},ultron:{name:"ULTRON",line:"Awaiting input."}};
 const LIMIT=5800;
-const GEN="The user pressed the Generate post button. They have not given an idea. You choose one specific, original topic that fits this community and its saved rules. You cannot see the subreddit, so base the topic on its name and the saved rules, and prefer a topic that sparks real discussion. Do not repeat a topic already generated earlier in this chat. Do not copy any existing post. If the topic would need studies or numbers you cannot supply, pick a question or discussion style post instead of stating facts you cannot back up. Write the DRAFT as a line starting with TITLE: followed by a blank line and the post body. Mention any flair or format the saved rules require in RISKS. Reply in the required format.";
+const GEN="The user pressed the Generate post button. They have not given an idea. You choose one specific, original topic that fits this community and its saved rules. You cannot see the subreddit, so base the topic on its name and the saved rules, and prefer a topic that sparks real discussion.\n"+
+"FOR THIS REQUEST, ignore the RECOMMENDATION / WHY / RISKS / DRAFT format. Reply with exactly three labelled parts and nothing else:\n"+
+"TITLE: one post title.\n"+
+"BODY: the full post text, following the writing rules. If the saved rules require a flair or format, end the body with one line starting with 'Flair or format note:'.\n"+
+"REPOST: up to 3 other communities from the list given below where this post could also be shared under their saved rules. For each one, write one line: the community name, why it fits, and what to change (title, flair or format). If none fit or their rules are missing, say so. Never call anything guaranteed safe. Say that the user should wait between posts and rewrite the post for each community instead of pasting the same text.\n"+
+"If the saved rules ban or restrict AI-written content, or no topic would respect the saved rules, write TITLE: None and BODY: None and explain why in REPOST.\n"+
+"Do not repeat a topic already generated in this chat or recently posted by the user. Do not copy any existing post. If the topic would need studies or numbers you cannot supply, choose a discussion or question style post instead of stating facts you cannot back up.";
 let chat=[];
 let busy=false;
 
-function getSub(){try{const s=localStorage.getItem("rp_sub");if(SUBS.indexOf(s)>-1)return s}catch(e){}return SUBS[0]}
+function esc(s){return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;")}
+function lower(x){return x.toLowerCase()}
+function getTheme(){try{const t=localStorage.getItem("rp_theme");if(THEMES[t])return t}catch(e){}return "jarvis"}
+function applyTheme(t){document.documentElement.setAttribute("data-theme",t)}
+function setTheme(t){try{localStorage.setItem("rp_theme",t)}catch(e){}applyTheme(t);render(false)}
+function themeButtons(){const t=getTheme();return Object.keys(THEMES).map(function(k){return '<button class="tbtn'+(k===t?' on':'')+'" onclick="setTheme(\''+k+'\')">'+THEMES[k].name+'</button>'}).join("")}
+function iconHTML(){
+  const t=getTheme();
+  if(t==="friday")return '<div class="icon"><span class="f1"></span><span class="f2"></span><span class="f3"></span><span class="f4"></span></div>';
+  if(t==="ultron")return '<div class="icon"><span class="u1"></span><span class="u2"></span><span class="u3"></span></div>';
+  return '<div class="icon"><span class="r1"></span><span class="r2"></span><span class="r3"></span><span class="r4"></span></div>';
+}
+
+function getCustom(){try{const a=JSON.parse(localStorage.getItem("rp_subs")||"[]");return Array.isArray(a)?a:[]}catch(e){return []}}
+function saveCustom(a){try{localStorage.setItem("rp_subs",JSON.stringify(a));return true}catch(e){return false}}
+function getSubs(){
+  const out=DEFAULT_SUBS.slice();
+  getCustom().forEach(function(s){if(out.map(lower).indexOf(lower(s))===-1)out.push(s)});
+  return out;
+}
+function getSub(){try{const s=localStorage.getItem("rp_sub");if(getSubs().indexOf(s)>-1)return s}catch(e){}return DEFAULT_SUBS[0]}
 let curSub=getSub();
 function setSubStore(s){try{localStorage.setItem("rp_sub",s)}catch(e){}}
+function addSub(){
+  const inp=document.getElementById("newsub");
+  const msg=document.getElementById("addmsg");
+  const v=inp.value.trim().replace(/^\/?r\//i,"").replace(/^\//,"");
+  if(!/^[A-Za-z0-9_]{3,21}$/.test(v)){msg.textContent="Use 3 to 21 letters, numbers or underscores. Example: Biohackers";msg.className="err";return}
+  if(getSubs().map(lower).indexOf(lower(v))>-1){msg.textContent="That community is already in your list.";msg.className="err";return}
+  const c=getCustom();c.push(v);
+  if(!saveCustom(c)){msg.textContent="This browser would not let the app save. Try Chrome or Brave, not private mode.";msg.className="err";return}
+  render(true);
+}
+function removeSub(s){
+  if(!confirm("Remove r/"+s+" and its saved rules from this app? This does not affect Reddit."))return;
+  saveCustom(getCustom().filter(function(x){return x!==s}));
+  const d=loadRules();delete d[s];storeRules(d);
+  if(curSub===s){curSub=DEFAULT_SUBS[0];setSubStore(curSub)}
+  render(true);
+}
+
+function loadHist(){try{const a=JSON.parse(localStorage.getItem("rp_hist")||"[]");return Array.isArray(a)?a:[]}catch(e){return []}}
+function saveHist(a){try{localStorage.setItem("rp_hist",JSON.stringify(a.slice(0,200)));return true}catch(e){return false}}
+function addHist(e){
+  e.id=String(Date.now())+Math.floor(Math.random()*1000);
+  e.date=new Date().toISOString();
+  const h=loadHist();h.unshift(e);saveHist(h);
+}
+function delHist(id){saveHist(loadHist().filter(function(x){return x.id!==id}));render(true)}
+function clearHist(){if(!confirm("Clear the whole activity history on this phone?"))return;saveHist([]);render(true)}
 function markOk(){try{localStorage.setItem("rp_ai_ok",new Date().toISOString())}catch(e){}}
 function getOk(){try{return localStorage.getItem("rp_ai_ok")}catch(e){return null}}
 function greeting(){const h=new Date().getHours();return h<12?"Good morning.":(h<18?"Good afternoon.":"Good evening.")}
@@ -128,7 +207,7 @@ function slug(p){return p.toLowerCase().replace(/ /g,"-")}
 function currentPage(){
   const s=location.hash.replace("#/","").replace("#","");
   if(s===""||s==="welcome")return "Welcome";
-  return pages.find(p=>slug(p)===s)||"Dashboard";
+  return pages.find(function(p){return slug(p)===s})||"Dashboard";
 }
 function show(name){
   if(location.hash==="#/"+slug(name)){render(false)}
@@ -159,28 +238,29 @@ function clearRules(sub){
 }
 function toggleMenu(){document.getElementById("menu").classList.toggle("open")}
 
-/* ---------- chat ---------- */
+/* ---------- generator ---------- */
 function chatHTML(){
   return '<div class="chat hud">'+
-  '<div class="chead"><div><div class="mono">Community</div><button class="picker" id="picker" onclick="togglePicker()"></button></div><div class="plist" id="plist"></div><button class="link" onclick="newChat()">New chat</button></div>'+
+  '<div class="chead"><div><div class="mono">Community</div><button class="picker" id="picker" onclick="togglePicker()"></button></div><div class="plist" id="plist"></div><button class="link" onclick="newChat()">Clear</button></div>'+
   '<div class="log" id="log"></div>'+
   '<div class="cnote" id="cnote"></div>'+
   '<button class="gen" id="gen" onclick="generatePost()">Generate post</button>'+
-  '<div class="inrow"><textarea class="cin" id="cin" rows="1" placeholder="Optional: add a direction, or ask a follow-up"></textarea><button class="send" id="send" onclick="sendMsg()">↑</button></div>'+
+  '<div class="inrow"><textarea class="cin" id="cin" rows="1" placeholder="Optional: add a direction, for example a subtopic to focus on"></textarea></div>'+
   '</div>';
 }
 function initChat(){updatePicker();drawLog();updateNote()}
 function updatePicker(){
   const rules=loadRules();
+  if(!getSubs().includes(curSub)){curSub=DEFAULT_SUBS[0]}
   document.getElementById("picker").textContent="r/"+curSub+" ▾";
   const pl=document.getElementById("plist");
   pl.innerHTML="";
-  SUBS.forEach(function(s){
+  getSubs().forEach(function(s){
     const b=document.createElement("button");
     if(s===curSub)b.className="on";
     const a=document.createElement("span");a.textContent="r/"+s;
     const c=document.createElement("span");c.textContent=rules[s]?"● rules saved":"○ no rules";
-    c.style.fontSize="12px";c.style.color="#7fa6b8";
+    c.style.fontSize="12px";c.style.color="var(--muted)";
     b.appendChild(a);b.appendChild(c);
     b.onclick=function(){pickSub(s)};
     pl.appendChild(b);
@@ -191,10 +271,54 @@ function pickSub(s){
   document.getElementById("plist").classList.remove("open");
   if(s===curSub)return;
   curSub=s;setSubStore(s);
-  if(chat.length){chat.push({role:"note",text:"Switched to r/"+s+". Earlier messages are not used for this community.",sub:s})}
+  if(chat.length){chat.push({role:"note",text:"Switched to r/"+s+".",sub:s})}
   updatePicker();drawLog();updateNote();
 }
 function newChat(){chat=[];drawLog()}
+function copyText(text,btn){
+  if(navigator.clipboard){navigator.clipboard.writeText(text).then(function(){btn.textContent="Copied"},function(){alert("Could not copy. Long-press the text to copy it.")})}
+  else{alert("Could not copy. Long-press the text to copy it.")}
+}
+function addSection(wrap,label,text,copy){
+  const s=document.createElement("div");s.className="sec";
+  const h=document.createElement("div");h.className="sechead";
+  const l=document.createElement("span");l.className="mono";l.textContent=label;h.appendChild(l);
+  if(copy&&text&&lower(text)!=="none"){
+    const cb=document.createElement("button");cb.className="mini";cb.textContent="Copy";
+    cb.onclick=function(){copyText(text,cb)};h.appendChild(cb);
+  }
+  const t=document.createElement("div");t.className="sectext";t.textContent=text;
+  s.appendChild(h);s.appendChild(t);wrap.appendChild(s);
+}
+function markPosted(m,sub){
+  if(!confirm("Record that you posted this in r/"+sub+"? Only do this if you really posted it on Reddit."))return;
+  addHist({type:"posted",sub:sub,title:m.parsed.title});
+  m.posted=(m.posted||[]);m.posted.push(sub);
+  drawLog();
+}
+function resultBlock(m){
+  const p=m.parsed;
+  const wrap=document.createElement("div");
+  wrap.className="result"+(m.shown?"":" pop");
+  m.shown=true;
+  if(p.notes){const n=document.createElement("p");n.className="notes";n.textContent=p.notes;wrap.appendChild(n)}
+  addSection(wrap,"Title",p.title,true);
+  addSection(wrap,"Body",p.body,true);
+  addSection(wrap,"Where it could also be shared",p.repost,false);
+  const f=document.createElement("div");f.className="mrow";
+  const t=document.createElement("span");t.className="tag";t.textContent="Not posted";f.appendChild(t);
+  if(m.model){const mt=document.createElement("span");mt.className="tag info";mt.textContent=modelLabel(m.model);f.appendChild(mt)}
+  (m.posted||[]).forEach(function(s){const pt=document.createElement("span");pt.className="tag ok";pt.textContent="Recorded: r/"+s;f.appendChild(pt)});
+  if(lower(p.title)!=="none"){
+    const sel=document.createElement("select");sel.className="mini";
+    getSubs().forEach(function(s){const o=document.createElement("option");o.value=s;o.textContent="r/"+s;if(s===m.sub)o.selected=true;sel.appendChild(o)});
+    const pb=document.createElement("button");pb.className="mini";pb.textContent="Mark as posted";
+    pb.onclick=function(){markPosted(m,sel.value)};
+    f.appendChild(sel);f.appendChild(pb);
+  }
+  wrap.appendChild(f);
+  return wrap;
+}
 function drawLog(){
   const log=document.getElementById("log");
   if(!log)return;
@@ -204,6 +328,7 @@ function drawLog(){
     return;
   }
   chat.forEach(function(m){
+    if(m.role==="ai"&&m.parsed){log.appendChild(resultBlock(m));return}
     const d=document.createElement("div");
     d.className="msg "+m.role+(m.bad?" bad":"")+(m.pending?" pend":"")+(m.shown?"":" pop");
     d.textContent=m.text;
@@ -211,14 +336,10 @@ function drawLog(){
     m.shown=true;
     if(m.role==="ai"&&!m.pending){
       const r=document.createElement("div");r.className="mrow";
-      const t=document.createElement("span");t.className="tag";t.textContent="Not posted";
-      r.appendChild(t);
+      const t=document.createElement("span");t.className="tag";t.textContent="Not posted";r.appendChild(t);
       if(m.model){const mt=document.createElement("span");mt.className="tag info";mt.textContent=modelLabel(m.model);r.appendChild(mt)}
       const cb=document.createElement("button");cb.className="mini";cb.textContent="Copy";
-      cb.onclick=function(){
-        if(navigator.clipboard){navigator.clipboard.writeText(m.text).then(function(){cb.textContent="Copied"},function(){alert("Could not copy. Long-press the text to copy it.")})}
-        else{alert("Could not copy. Long-press the text to copy it.")}
-      };
+      cb.onclick=function(){copyText(m.text,cb)};
       r.appendChild(cb);log.appendChild(r);
     }
   });
@@ -226,54 +347,61 @@ function drawLog(){
 }
 function updateNote(){
   const n=document.getElementById("cnote");
-  const btn=document.getElementById("send");
   const gen=document.getElementById("gen");
-  if(!n||!btn||!gen)return;
+  if(!n||!gen)return;
   const r=loadRules()[curSub];
-  if(r){n.innerHTML="";btn.disabled=busy;gen.disabled=busy}
+  if(r){n.innerHTML="";gen.disabled=busy}
   else{
-    n.innerHTML='<span class="tag">No rules saved</span><p>Save the rules for r/'+curSub+' first, so the AI does not guess them.</p><button class="link" onclick="show(\'Subreddit Research\')">Go to Subreddit Research ›</button>';
-    btn.disabled=true;gen.disabled=true;
+    n.innerHTML='<span class="tag">No rules saved</span><p>Save the rules for r/'+esc(curSub)+' first, so the AI does not guess them.</p><button class="link" onclick="show(\'Subreddit Research\')">Go to Subreddit Research ›</button>';
+    gen.disabled=true;
   }
 }
 function pre(sub){
-  return "You are advising on a possible Reddit contribution for r/"+sub+".\nThe ONLY subreddit rules you know are the ones pasted below. Do not assume any other rules.\nIf the idea would break any saved rule, say so clearly and recommend WAIT or DO NOTHING.\nThis is a chat. If the message is a follow-up, use the earlier conversation, and still reply in the required format.\n\n";
+  return "You are advising on a possible Reddit post for r/"+sub+".\nThe ONLY subreddit rules you know are the ones pasted below. Do not assume any other rules.\n\n";
 }
-function sendMsg(){
-  const inp=document.getElementById("cin");
-  const topic=inp.value.trim();
-  if(!topic)return;
-  runAgent(topic,topic);
+function parseResult(t){
+  const c=t.replace(/\*\*/g,"").replace(/^\s*#+\s*/gm,"");
+  const m=c.match(/TITLE:\s*([\s\S]*?)\s*BODY:\s*([\s\S]*?)\s*REPOST:\s*([\s\S]*)$/);
+  if(!m)return null;
+  const i=c.indexOf("TITLE:");
+  return {notes:c.slice(0,i).trim(),title:m[1].trim(),body:m[2].trim(),repost:m[3].trim()};
 }
-function generatePost(){
-  const extra=document.getElementById("cin").value.trim();
-  const text=GEN+(extra?"\nExtra direction from the user: "+extra:"");
-  runAgent(text,"Generate a post for r/"+curSub+(extra?" - "+extra:""));
-}
-async function runAgent(text,shown){
+async function generatePost(){
   if(busy)return;
   const sub=curSub;
-  const r=loadRules()[sub];
+  const rules=loadRules();
+  const r=rules[sub];
   if(!r){updateNote();return}
+  const extra=document.getElementById("cin").value.trim();
   const head=pre(sub)+"SAVED RULES FOR r/"+sub+":\n"+r.text+"\n\n";
-  const tail="USER'S MESSAGE:\n"+text;
-  const base=head.length+tail.length;
-  if(base>LIMIT){
-    chat.push({role:"note",bad:true,text:"This is too long ("+base+" characters, the limit is "+LIMIT+"). Shorten your message or the saved rules for r/"+sub+".",sub:sub});
+  const mid=GEN+(extra?"\nExtra direction from the user: "+extra:"")+"\n\n";
+  const recent=loadHist().filter(function(h){return h.type==="posted"}).slice(0,3);
+  const recentBlock=recent.length?"RECENT POSTS THE USER RECORDED (avoid repeating these topics):\n"+recent.map(function(h){return "- r/"+h.sub+", "+h.date.slice(0,10)+", "+String(h.title||"").slice(0,80)}).join("\n")+"\n\n":"";
+  const titles=chat.filter(function(m){return m.role==="ai"&&m.parsed&&m.sub===sub&&lower(m.parsed.title)!=="none"}).slice(-5).map(function(m){return "- "+m.parsed.title.slice(0,80)});
+  const earlier=titles.length?"TOPICS ALREADY GENERATED IN THIS CHAT (do not repeat):\n"+titles.join("\n")+"\n\n":"";
+  const base=head+mid+recentBlock+earlier;
+  if(base.length>LIMIT-300){
+    chat.push({role:"note",bad:true,text:"This is too long ("+base.length+" characters, the limit is about "+(LIMIT-300)+"). Shorten the saved rules for r/"+sub+" or your direction.",sub:sub});
     drawLog();return;
   }
-  let lastNote=-1;
-  chat.forEach(function(m,i){if(m.role==="note")lastNote=i});
-  const prev=chat.slice(lastNote+1).filter(function(m){return (m.role==="user"||m.role==="ai")&&!m.pending});
-  let hist="";
-  let room=LIMIT-base-60;
-  for(let i=prev.length-1;i>=0;i--){
-    const line=(prev[i].role==="user"?"User: ":"Agent: ")+prev[i].text.slice(0,700)+"\n";
-    if(line.length>room)break;
-    hist=line+hist;room-=line.length;
+  const oth=getSubs().filter(function(s){return s!==sub});
+  const withR=oth.filter(function(s){return rules[s]});
+  const noR=oth.filter(function(s){return !rules[s]});
+  const noLine=noR.length?"No rules saved for these, do not suggest them: "+noR.map(function(s){return "r/"+s}).join(", ")+"\n":"";
+  const room=LIMIT-base.length-200-noLine.length;
+  const per=withR.length?Math.min(900,Math.floor(room/withR.length)):0;
+  let others="";
+  if(withR.length&&per>=150){
+    others="OTHER COMMUNITIES YOU MAY SUGGEST FOR REPOSTING. Their rules may be cut short and marked [cut]. If a community's rules are marked [cut], tell the user to read its full rules first.\n";
+    withR.forEach(function(s){const t=rules[s].text;others+="\nr/"+s+" RULES:\n"+(t.length>per?t.slice(0,per)+" [cut]":t)+"\n"});
+    others+="\n"+noLine;
+  }else if(withR.length){
+    others="There is no room to include other communities' rules this time. In REPOST, say that repost suggestions could not be checked and the user must read each community's rules.\n";
+  }else{
+    others="No other community has saved rules. In REPOST, say that none can be suggested until the user saves their rules.\n";
   }
-  const prompt=head+(hist?"EARLIER IN THIS CHAT:\n"+hist+"\n":"")+tail;
-  chat.push({role:"user",text:shown,sub:sub});
+  const prompt=base+others+"\nGenerate now.";
+  chat.push({role:"user",text:"Generate a post for r/"+sub+(extra?" - "+extra:""),sub:sub});
   const pend={role:"ai",text:"Processing",sub:sub,pending:true};
   chat.push(pend);
   document.getElementById("cin").value="";
@@ -283,6 +411,8 @@ async function runAgent(text,shown){
     const data=await res.json();
     if(!res.ok||data.error){throw new Error(data.error||("Error "+res.status))}
     pend.text=data.text;pend.model=data.model;pend.pending=false;pend.shown=false;markOk();
+    pend.parsed=parseResult(data.text);
+    if(pend.parsed&&lower(pend.parsed.title)!=="none"){addHist({type:"generated",sub:sub,title:pend.parsed.title})}
   }catch(e){
     pend.role="note";pend.bad=true;pend.pending=false;pend.shown=false;
     pend.text="Something went wrong: "+e.message;
@@ -295,43 +425,48 @@ async function runAgent(text,shown){
 function render(keepScroll){
   const name=currentPage();
   const home=name==="Welcome";
+  const th=getTheme();
   document.getElementById("menu").classList.remove("open");
   document.getElementById("topbar").style.display=home?"none":"flex";
   document.getElementById("fab").style.display=home?"none":"block";
   const s=document.getElementById("sheet");
   s.innerHTML="";
   const hb=document.createElement("button");hb.textContent="Home";hb.onclick=function(){show("Welcome")};s.appendChild(hb);
-  pages.forEach(p=>{const b=document.createElement("button");b.textContent=p;if(p===name)b.className="on";b.onclick=()=>show(p);s.appendChild(b)});
+  pages.forEach(function(p){const b=document.createElement("button");b.textContent=p;if(p===name)b.className="on";b.onclick=function(){show(p)};s.appendChild(b)});
   const d=loadRules();
-  const saved=Object.keys(d).length;
+  const subs=getSubs();
+  const saved=subs.filter(function(x){return d[x]}).length;
+  const hist=loadHist();
+  const posted=hist.filter(function(x){return x.type==="posted"});
   let h="";
   if(name!=="Dashboard"&&!home){h+='<button class="back" onclick="goBack()">‹ Back</button>'}
   if(home){
-    h+='<div class="hero"><div class="reactor"><span class="r1"></span><span class="r2"></span><span class="r3"></span><span class="r4"></span></div><div class="mono">'+greeting()+' Awaiting your command.</div><h1>Welcome to <span class="gtext">RedditPilot AI</span></h1><p>Research communities, check ideas against their rules, and prepare thoughtful drafts. You stay in control of everything you post.</p><button class="cta" onclick="show(\'Dashboard\')">Get started</button><div class="foot">🔒 Nothing is ever posted or sent for you.</div></div>';
+    h+='<div class="hero">'+iconHTML()+'<div class="mono">'+greeting()+' '+THEMES[th].line+'</div><h1>Welcome to <span class="gtext">RedditPilot AI</span></h1><p>Research communities, check ideas against their rules, and prepare thoughtful drafts. You stay in control of everything you post.</p><button class="cta" onclick="show(\'Dashboard\')">Get started</button><div class="themes">'+themeButtons()+'</div><div class="foot">🔒 Nothing is ever posted or sent for you.</div></div>';
   } else if(name==="Dashboard"){
-    h+='<div class="mono">Command center</div><h2 style="margin-top:6px">'+greeting()+' <span class="gtext">Ready.</span></h2>';
+    h+='<div class="mono">'+THEMES[th].name+' · Command center</div><h2 style="margin-top:6px">'+greeting()+' <span class="gtext">Ready.</span></h2>';
     h+=chatHTML();
-    h+='<div class="card"><div class="mono">Account safety</div><h3 style="margin-top:6px">Caution · Reddit isn\'t connected</h3><p>Account age, recent activity, moderation history and API limits are unavailable. Nothing has been checked.</p><button class="link" onclick="show(\'Account Safety\')">Review safety ›</button></div>';
     const ok=getOk();
     const aiTag=ok?'<span class="tag ok">Working</span>':'<span class="tag">Not tested</span>';
-    const aiText=ok?'Last successful answer: '+new Date(ok).toLocaleString()+'.':'Set up on Cloudflare. Tap Generate post above to test it.';
+    const aiText=ok?'Last successful answer: '+esc(new Date(ok).toLocaleString())+'.':'Set up on Cloudflare. Tap Generate post above to test it.';
+    const lastText=posted.length?'Last posted: r/'+esc(posted[0].sub)+' on '+esc(new Date(posted[0].date).toLocaleDateString()):'No posts recorded yet';
+    h+='<div class="card"><div class="mono">Account safety</div><h3 style="margin-top:6px">Caution · Reddit isn\'t connected</h3><p>Account age, recent activity, moderation history and API limits are unavailable. Nothing has been checked.</p><button class="link" onclick="show(\'Account Safety\')">Review safety ›</button></div>';
     h+='<div class="row" style="margin-top:24px"><h3 style="margin:0;font-family:var(--head);font-size:14px;letter-spacing:.08em">CONNECTION STATUS</h3><span class="mono">Partly set up</span></div>';
     h+='<div class="card"><div class="row"><h3>Reddit account</h3><span class="tag">Not connected</span></div><p>No authorized Reddit account connected.</p></div>';
     h+='<div class="card"><div class="row"><h3>AI agent</h3>'+aiTag+'</div><p>'+aiText+'</p></div>';
     h+='<div class="card"><div class="row"><h3>Telegram notifications</h3><span class="tag">Not connected</span></div><p>No Telegram integration connected.</p></div>';
-    h+='<div class="card"><div class="row"><h3>Pending content</h3><span class="mono">No data</span></div><div style="text-align:center;padding:20px 0"><b>Nothing prepared yet</b><p>Drafts will appear here when you create them. Nothing is queued to post.</p></div></div>';
     h+='<div class="card"><div class="row"><h3>Explore</h3><span class="mono">Workspace</span></div>';
-    h+='<div class="item" onclick="show(\'Subreddit Research\')"><b>Subreddit Research ›</b><p style="margin:2px 0 0">'+saved+' of '+SUBS.length+' communities have rules saved</p></div>';
-    h+='<div class="item"><b>Post Generator</b><p style="margin:2px 0 0">Not available yet</p></div>';
-    h+='<div class="item"><b>Activity History</b><p style="margin:2px 0 0">No data yet</p></div></div>';
+    h+='<div class="item" onclick="show(\'Subreddit Research\')"><b>Subreddit Research ›</b><p style="margin:2px 0 0">'+saved+' of '+subs.length+' communities have rules saved</p></div>';
+    h+='<div class="item" onclick="show(\'Activity History\')"><b>Activity History ›</b><p style="margin:2px 0 0">'+lastText+'</p></div></div>';
     h+='<div class="foot">🔒 Human-led by design. RedditPilot will not post or send anything on your behalf from this workspace.</div>';
-  } else if(name==="AI Agent"){
-    h+='<h2>AI <span class="gtext">Agent</span></h2>';
+  } else if(name==="AI Agent"||name==="Post Generator"){
+    h+='<h2>'+(name==="AI Agent"?'AI <span class="gtext">Agent</span>':'Post <span class="gtext">Generator</span>')+'</h2>';
     h+=chatHTML();
-    h+='<div class="foot">Free AI limits apply. If you see a limit message, wait a while and try again. Do not put private information in your messages. The chat is cleared when you refresh the page.</div>';
+    h+='<div class="foot">Free AI limits apply. If you see a limit message, wait a while and try again. Do not put private information in your direction. Results are cleared when you refresh the page, but Mark as posted entries are kept in Activity History.</div>';
   } else if(name==="Subreddit Research"){
-    h+='<h2>Subreddit Research</h2><p>Open each community\'s rules on Reddit, copy them, and paste them below. The AI will use only what you save here. Rules are saved on this phone\'s browser only.</p>';
-    SUBS.forEach(sub=>{
+    h+='<h2>Subreddit Research</h2><p>Open each community\'s rules on Reddit, copy them, and paste them below. The AI will use only what you save here. Everything is saved on this phone\'s browser only.</p>';
+    h+='<div class="card"><h3>Add a subreddit</h3><p>Type the name, with or without r/. The app cannot check that it exists on Reddit, so type it carefully.</p><input type="text" id="newsub" placeholder="Example: Biohackers" autocapitalize="off" autocomplete="off"><button class="btn" onclick="addSub()">Add</button><div id="addmsg" style="margin-top:8px;font-size:13px"></div></div>';
+    const custom=getCustom();
+    subs.forEach(function(sub){
       const r=d[sub];
       let status='<span class="tag">No rules saved</span>';
       let note='';
@@ -339,29 +474,54 @@ function render(keepScroll){
         status='<span class="tag ok">Rules saved</span>';
         const dt=new Date(r.date);
         const days=Math.floor((Date.now()-dt.getTime())/86400000);
-        note='<p>Saved on '+dt.toLocaleDateString()+(days>30?'. This is over 30 days old, so please check Reddit for rule changes.':'.')+'</p>';
+        note='<p>Saved on '+esc(dt.toLocaleDateString())+(days>30?'. This is over 30 days old, so please check Reddit for rule changes.':'.')+'</p>';
       }
-      h+='<div class="card"><div class="row"><h3>r/'+sub+'</h3>'+status+'</div>'+note;
-      h+='<a class="link" href="https://www.reddit.com/r/'+sub+'/about/rules" target="_blank" rel="noopener">Open rules on Reddit ↗</a>';
-      h+='<textarea id="rules-'+sub+'" placeholder="Paste the rules here. Include notes on links, self-promotion, flair, and allowed post types."></textarea>';
-      h+='<div><button class="btn" onclick="saveRules(\''+sub+'\')">Save rules</button>';
-      if(r)h+='<button class="btn alt" onclick="clearRules(\''+sub+'\')">Delete</button>';
+      h+='<div class="card"><div class="row"><h3>r/'+esc(sub)+'</h3>'+status+'</div>'+note;
+      h+='<a class="link" href="https://www.reddit.com/r/'+esc(sub)+'/about/rules" target="_blank" rel="noopener">Open rules on Reddit ↗</a>';
+      h+='<textarea id="rules-'+esc(sub)+'" placeholder="Paste the rules here. Include notes on links, self-promotion, flair, and allowed post types."></textarea>';
+      h+='<div><button class="btn" onclick="saveRules(\''+esc(sub)+'\')">Save rules</button>';
+      if(r)h+='<button class="btn alt" onclick="clearRules(\''+esc(sub)+'\')">Delete rules</button>';
+      if(custom.indexOf(sub)>-1)h+='<button class="btn alt" onclick="removeSub(\''+esc(sub)+'\')">Remove subreddit</button>';
       h+='</div></div>';
     });
     h+='<div class="foot">If you clear your browser data, saved rules are removed and you would need to paste them again.</div>';
+  } else if(name==="Activity History"){
+    h+='<h2>Activity History</h2>';
+    h+='<div class="card"><div class="mono">Last posted</div>';
+    if(posted.length){
+      h+='<h3 style="margin-top:6px">r/'+esc(posted[0].sub)+'</h3><p>'+esc(posted[0].title||"")+'</p><p>'+esc(new Date(posted[0].date).toLocaleString())+'</p>';
+    }else{
+      h+='<p>No posts recorded yet. You post on Reddit yourself, so tap Mark as posted under a generated post after you post it.</p>';
+    }
+    h+='</div>';
+    h+='<div class="card"><div class="mono">Last posted per community</div>';
+    subs.forEach(function(sub){
+      const lp=posted.find(function(x){return x.sub===sub});
+      h+='<div class="item"><b>r/'+esc(sub)+'</b><p style="margin:2px 0 0">'+(lp?esc(new Date(lp.date).toLocaleDateString()):'Nothing recorded')+'</p></div>';
+    });
+    h+='</div>';
+    h+='<div class="row" style="margin-top:20px"><div class="mono">All activity</div>'+(hist.length?'<button class="link" onclick="clearHist()">Clear all</button>':'')+'</div>';
+    if(!hist.length){h+='<div class="card"><p>Nothing yet. Generated posts and posts you mark as posted will appear here.</p></div>'}
+    hist.forEach(function(x){
+      h+='<div class="card"><div class="row"><h3>r/'+esc(x.sub)+'</h3><span class="tag '+(x.type==="posted"?'ok':'info')+'">'+(x.type==="posted"?'Posted (recorded by you)':'Generated')+'</span></div><p>'+esc(x.title||"")+'</p><p>'+esc(new Date(x.date).toLocaleString())+'</p><button class="link" onclick="delHist(\''+esc(x.id)+'\')">Delete entry</button></div>';
+    });
+  } else if(name==="Settings"){
+    h+='<h2>Settings</h2><div class="card"><h3>Persona</h3><p>Pick the look of the app. It is saved on this phone.</p><div class="themes">'+themeButtons()+'</div></div>';
+    h+='<div class="card"><h3>Stored on this phone</h3><p>Your saved rules, added subreddits, history and persona live in this browser only. Clearing browser data removes them.</p></div>';
   } else {
-    h+='<h2>'+name+'</h2><div class="card"><span class="tag">Not built yet</span><p>This page will be added in a later step.</p></div>';
+    h+='<h2>'+esc(name)+'</h2><div class="card"><span class="tag">Not built yet</span><p>This page will be added in a later step.</p></div>';
   }
   const main=document.getElementById("main");
   main.innerHTML=h;
   if(!keepScroll){main.classList.remove("page");void main.offsetWidth;main.classList.add("page")}
   if(name==="Subreddit Research"){
-    SUBS.forEach(sub=>{const t=document.getElementById("rules-"+sub);if(t&&d[sub])t.value=d[sub].text});
+    subs.forEach(function(sub){const t=document.getElementById("rules-"+sub);if(t&&d[sub])t.value=d[sub].text});
   }
-  if(name==="Dashboard"||name==="AI Agent"){initChat()}
+  if(name==="Dashboard"||name==="AI Agent"||name==="Post Generator"){initChat()}
   document.title=(name==="Dashboard"||home?"":name+" · ")+"RedditPilot AI";
   if(!keepScroll)window.scrollTo(0,0);
 }
+applyTheme(getTheme());
 render(false);
 </script>
 </body>
