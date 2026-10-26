@@ -24,6 +24,7 @@ p{color:var(--muted);line-height:1.5;margin:6px 0}
 .card.sand{background:var(--sand)}
 .card h3{margin:0 0 4px;font-size:17px}
 .link{color:var(--dark);font-weight:700;background:none;border:0;padding:8px 0;font-size:14px;text-decoration:none;display:inline-block}
+.back{color:var(--dark);font-weight:600;background:none;border:0;padding:0 0 14px;font-size:15px}
 .row{display:flex;justify-content:space-between;align-items:center;gap:10px}
 .tag{border-radius:12px;padding:4px 10px;background:#f6e9d6;color:#8a5a2b;font-size:11px;font-family:ui-monospace,Menlo,monospace;white-space:nowrap}
 .tag.ok{background:#dcebe1;color:#24543a}
@@ -52,6 +53,20 @@ textarea{width:100%;min-height:140px;margin-top:10px;padding:12px;border:1px sol
 const pages=["Dashboard","AI Agent","Post Generator","Comment Generator","Subreddit Research","Content Discovery","Pending Content","Account Safety","Analytics","Activity History","Notifications","Settings"];
 const SUBS=["AppliedBiology","FemaleLifespan","HumanBiohacking","BiohackingForBeginner","PeptideBiotech"];
 
+function slug(p){return p.toLowerCase().replace(/ /g,"-")}
+function currentPage(){
+  const s=location.hash.replace("#/","");
+  return pages.find(p=>slug(p)===s)||"Dashboard";
+}
+function show(name){
+  if(location.hash==="#/"+slug(name)){render(false)}
+  else{location.hash="#/"+slug(name)}
+}
+function goBack(){
+  if(history.length>1){history.back()}else{show("Dashboard")}
+}
+window.addEventListener("hashchange",function(){render(false)});
+
 function loadRules(){
   try{return JSON.parse(localStorage.getItem("rp_rules")||"{}")}catch(e){return {}}
 }
@@ -63,16 +78,17 @@ function saveRules(sub){
   const d=loadRules();
   if(t){d[sub]={text:t,date:new Date().toISOString()}}else{delete d[sub]}
   if(!storeRules(d)){alert("This browser would not let the app save. Try Chrome or Brave, not private mode.");return}
-  show("Subreddit Research",true);
+  render(true);
 }
 function clearRules(sub){
   if(!confirm("Delete the saved rules for r/"+sub+"?"))return;
   const d=loadRules();delete d[sub];storeRules(d);
-  show("Subreddit Research",true);
+  render(true);
 }
 function toggleMenu(){const m=document.getElementById("menu");m.style.display=m.style.display==="block"?"none":"block"}
 
-function show(name,keepScroll){
+function render(keepScroll){
+  const name=currentPage();
   document.getElementById("menu").style.display="none";
   const s=document.getElementById("sheet");
   s.innerHTML="";
@@ -80,6 +96,7 @@ function show(name,keepScroll){
   const d=loadRules();
   const saved=Object.keys(d).length;
   let h="";
+  if(name!=="Dashboard"){h+='<button class="back" onclick="goBack()">‹ Back</button>'}
   if(name==="Dashboard"){
     h+='<div class="mono">Your Reddit workspace</div><h1>Good work starts with listening.</h1><p>A clear place to research conversations and prepare thoughtful content, while every decision stays yours.</p>';
     h+='<div class="card green"><h3>Your workspace is ready for a careful start</h3><p>RedditPilot is not connected to Reddit, an AI agent, or Telegram. Integrations will be set up in later steps.</p><button class="link" onclick="show(\'Settings\')">Setup details ↗</button></div>';
@@ -90,7 +107,7 @@ function show(name,keepScroll){
     });
     h+='<div class="card"><div class="row"><h3>Pending content</h3><span class="mono">No data</span></div><div style="text-align:center;padding:20px 0"><b>Nothing prepared yet</b><p>Drafts will appear here when you create them. Nothing is queued to post.</p></div></div>';
     h+='<div class="card"><div class="row"><h3>Explore your workspace</h3><span class="mono">Workspace</span></div>';
-    h+='<div class="item" onclick="show(\'Subreddit Research\')"><b>Subreddit Research</b><p style="margin:2px 0 0">'+saved+' of '+SUBS.length+' communities have rules saved</p></div>';
+    h+='<div class="item" onclick="show(\'Subreddit Research\')"><b>Subreddit Research ›</b><p style="margin:2px 0 0">'+saved+' of '+SUBS.length+' communities have rules saved</p></div>';
     h+='<div class="item"><b>Post Generator</b><p style="margin:2px 0 0">Not available yet</p></div>';
     h+='<div class="item"><b>Activity History</b><p style="margin:2px 0 0">No data yet</p></div></div>';
     h+='<div class="foot">🔒 Human-led by design. RedditPilot will not post or send anything on your behalf from this workspace.</div>';
@@ -121,9 +138,10 @@ function show(name,keepScroll){
   if(name==="Subreddit Research"){
     SUBS.forEach(sub=>{const t=document.getElementById("rules-"+sub);if(t&&d[sub])t.value=d[sub].text});
   }
+  document.title=(name==="Dashboard"?"":name+" · ")+"RedditPilot AI";
   if(!keepScroll)window.scrollTo(0,0);
 }
-show("Dashboard");
+render(false);
 </script>
 </body>
 </html>
