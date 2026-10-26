@@ -31,9 +31,14 @@ p{color:var(--muted);line-height:1.5;margin:6px 0}
 .item{padding:14px 0;border-top:1px solid var(--line)}
 .item:first-of-type{border-top:0}
 .foot{font-size:13px;color:var(--muted);margin-top:24px}
-textarea{width:100%;min-height:140px;margin-top:10px;padding:12px;border:1px solid var(--line);border-radius:12px;font-size:15px;font-family:inherit;background:var(--bg);color:var(--ink);resize:vertical}
+label{display:block;font-weight:600;margin-top:12px}
+select,textarea{width:100%;margin-top:8px;padding:12px;border:1px solid var(--line);border-radius:12px;font-size:15px;font-family:inherit;background:var(--bg);color:var(--ink)}
+textarea{min-height:140px;resize:vertical}
 .btn{border:0;border-radius:12px;padding:12px 16px;font-size:15px;background:var(--dark);color:#fff;margin-top:10px;margin-right:8px}
 .btn.alt{background:#fff;color:var(--dark);border:1px solid var(--line)}
+.btn:disabled{opacity:.5}
+.out{white-space:pre-wrap;line-height:1.55;color:var(--ink);margin-top:8px}
+.err{color:#9a3b2e}
 #fab{position:fixed;right:16px;bottom:16px;width:58px;height:58px;border-radius:18px;background:var(--dark);color:#fff;font-size:24px;border:0}
 #menu{display:none;position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:5}
 #sheet{position:absolute;bottom:0;left:0;right:0;background:var(--bg);border-radius:20px 20px 0 0;padding:14px 16px 24px;max-height:80%;overflow:auto}
@@ -50,8 +55,10 @@ textarea{width:100%;min-height:140px;margin-top:10px;padding:12px;border:1px sol
 <button id="fab" onclick="toggleMenu()">☰</button>
 <div id="menu" onclick="toggleMenu()"><div id="sheet" onclick="event.stopPropagation()"></div></div>
 <script>
+const AGENT_URL="https://redditpilot-agent.subsbooster123.workers.dev/";
 const pages=["Dashboard","AI Agent","Post Generator","Comment Generator","Subreddit Research","Content Discovery","Pending Content","Account Safety","Analytics","Activity History","Notifications","Settings"];
 const SUBS=["AppliedBiology","FemaleLifespan","HumanBiohacking","BiohackingForBeginner","PeptideBiotech"];
+let lastAnswer="";
 
 function slug(p){return p.toLowerCase().replace(/ /g,"-")}
 function currentPage(){
@@ -87,6 +94,55 @@ function clearRules(sub){
 }
 function toggleMenu(){const m=document.getElementById("menu");m.style.display=m.style.display==="block"?"none":"block"}
 
+function updateNote(){
+  const sub=document.getElementById("agent-sub").value;
+  const r=loadRules()[sub];
+  const note=document.getElementById("agent-note");
+  const btn=document.getElementById("agent-btn");
+  if(r){
+    note.innerHTML='<span class="tag ok">Rules saved</span><p>The AI will use the rules you saved for r/'+sub+'.</p>';
+    btn.disabled=false;
+  }else{
+    note.innerHTML='<span class="tag">No rules saved</span><p>Save the rules for r/'+sub+' first, so the AI does not guess them.</p><button class="link" onclick="show(\'Subreddit Research\')">Go to Subreddit Research ›</button>';
+    btn.disabled=true;
+  }
+}
+
+async function askAgent(){
+  const sub=document.getElementById("agent-sub").value;
+  const topic=document.getElementById("agent-topic").value.trim();
+  const r=loadRules()[sub];
+  const out=document.getElementById("agent-out");
+  const btn=document.getElementById("agent-btn");
+  if(!r){updateNote();return}
+  if(!topic){out.innerHTML='<p class="err">Please type your idea or topic first.</p>';return}
+  const prompt=
+    "You are advising on a possible Reddit contribution for r/"+sub+".\n"+
+    "The ONLY subreddit rules you know are the ones pasted below. Do not assume any other rules.\n"+
+    "Extra safety rules for biology, biohacking and peptide topics: give no medical advice, no dosing, no sourcing or vendor information. Do not present unproven claims as fact. Do not invent studies, sources, quotes or numbers. If a claim would need a source that the user has not provided, say so. Flag health claims as a risk.\n"+
+    "If the idea would break any saved rule, say so clearly and recommend WAIT or DO NOTHING.\n\n"+
+    "SAVED RULES FOR r/"+sub+":\n"+r.text+"\n\n"+
+    "USER'S IDEA OR TOPIC:\n"+topic;
+  btn.disabled=true;btn.textContent="Thinking...";
+  out.innerHTML='<p>Asking the agent. This can take up to a minute.</p>';
+  try{
+    const res=await fetch(AGENT_URL,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({prompt:prompt})});
+    const data=await res.json();
+    if(!res.ok||data.error){throw new Error(data.error||("Error "+res.status))}
+    lastAnswer=data.text;
+    out.innerHTML='<div class="card"><div class="row"><h3>Agent answer</h3><span class="tag">Not posted</span></div><div class="out" id="agent-text"></div><button class="btn alt" onclick="copyAnswer()">Copy</button></div>';
+    document.getElementById("agent-text").textContent=data.text;
+  }catch(e){
+    out.innerHTML='<p class="err"></p>';
+    out.firstChild.textContent="Something went wrong: "+e.message;
+  }
+  btn.disabled=false;btn.textContent="Ask the agent";
+}
+function copyAnswer(){
+  if(navigator.clipboard){navigator.clipboard.writeText(lastAnswer).then(function(){alert("Copied")},function(){alert("Could not copy. Long-press the text to copy it.")})}
+  else{alert("Could not copy. Long-press the text to copy it.")}
+}
+
 function render(keepScroll){
   const name=currentPage();
   document.getElementById("menu").style.display="none";
@@ -99,18 +155,28 @@ function render(keepScroll){
   if(name!=="Dashboard"){h+='<button class="back" onclick="goBack()">‹ Back</button>'}
   if(name==="Dashboard"){
     h+='<div class="mono">Your Reddit workspace</div><h1>Good work starts with listening.</h1><p>A clear place to research conversations and prepare thoughtful content, while every decision stays yours.</p>';
-    h+='<div class="card green"><h3>Your workspace is ready for a careful start</h3><p>RedditPilot is not connected to Reddit, an AI agent, or Telegram. Integrations will be set up in later steps.</p><button class="link" onclick="show(\'Settings\')">Setup details ↗</button></div>';
-    h+='<div class="card sand"><div class="mono">Account safety</div><h3 style="margin-top:6px">Caution · Reddit isn\'t connected</h3><p>Account age, recent activity, moderation history, subreddit rules and API limits are unavailable. Nothing has been checked.</p><button class="link" onclick="show(\'Account Safety\')">Review safety ↗</button></div>';
-    h+='<div class="row" style="margin-top:24px"><h3 style="margin:0;font-weight:500;font-size:20px">Connection status</h3><span class="mono">Not connected</span></div>';
-    [["Reddit account","Not connected","No authorized Reddit account connected."],["AI agent","Inactive","The agent has not been set up and is inactive."],["Telegram notifications","Not connected","No Telegram integration connected."]].forEach(c=>{
+    h+='<div class="card green"><h3>Your workspace is ready for a careful start</h3><p>RedditPilot is not connected to Reddit or Telegram. The AI agent is set up on Cloudflare but has not been tested from this app yet.</p><button class="link" onclick="show(\'Settings\')">Setup details ↗</button></div>';
+    h+='<div class="card sand"><div class="mono">Account safety</div><h3 style="margin-top:6px">Caution · Reddit isn\'t connected</h3><p>Account age, recent activity, moderation history and API limits are unavailable. Nothing has been checked.</p><button class="link" onclick="show(\'Account Safety\')">Review safety ↗</button></div>';
+    h+='<div class="row" style="margin-top:24px"><h3 style="margin:0;font-weight:500;font-size:20px">Connection status</h3><span class="mono">Partly set up</span></div>';
+    [["Reddit account","Not connected","No authorized Reddit account connected."],["AI agent","Not tested","Set up on Cloudflare. Ask it something on the AI Agent page to test it."],["Telegram notifications","Not connected","No Telegram integration connected."]].forEach(c=>{
       h+='<div class="card"><div class="row"><h3>'+c[0]+'</h3><span class="tag">'+c[1]+'</span></div><p>'+c[2]+'</p></div>';
     });
     h+='<div class="card"><div class="row"><h3>Pending content</h3><span class="mono">No data</span></div><div style="text-align:center;padding:20px 0"><b>Nothing prepared yet</b><p>Drafts will appear here when you create them. Nothing is queued to post.</p></div></div>';
     h+='<div class="card"><div class="row"><h3>Explore your workspace</h3><span class="mono">Workspace</span></div>';
+    h+='<div class="item" onclick="show(\'AI Agent\')"><b>AI Agent ›</b><p style="margin:2px 0 0">Ask for a post, comment, wait or do-nothing recommendation</p></div>';
     h+='<div class="item" onclick="show(\'Subreddit Research\')"><b>Subreddit Research ›</b><p style="margin:2px 0 0">'+saved+' of '+SUBS.length+' communities have rules saved</p></div>';
     h+='<div class="item"><b>Post Generator</b><p style="margin:2px 0 0">Not available yet</p></div>';
     h+='<div class="item"><b>Activity History</b><p style="margin:2px 0 0">No data yet</p></div></div>';
     h+='<div class="foot">🔒 Human-led by design. RedditPilot will not post or send anything on your behalf from this workspace.</div>';
+  } else if(name==="AI Agent"){
+    h+='<h2>AI Agent</h2><p>Pick a community and describe your idea. The agent checks it against the rules you saved and recommends whether to post, comment, wait, or do nothing. It never posts anything.</p>';
+    h+='<div class="card"><label for="agent-sub">Subreddit</label><select id="agent-sub" onchange="updateNote()">';
+    SUBS.forEach(sub=>{h+='<option value="'+sub+'">r/'+sub+'</option>'});
+    h+='</select><div id="agent-note" style="margin-top:10px"></div>';
+    h+='<label for="agent-topic">Your idea or topic</label><textarea id="agent-topic" placeholder="Describe what you want to post or comment about."></textarea>';
+    h+='<button class="btn" id="agent-btn" onclick="askAgent()">Ask the agent</button></div>';
+    h+='<div id="agent-out"></div>';
+    h+='<div class="foot">Free AI limits apply. If you see a limit message, wait a while and try again. Do not put private information in your idea.</div>';
   } else if(name==="Subreddit Research"){
     h+='<h2>Subreddit Research</h2><p>Open each community\'s rules on Reddit, copy them, and paste them below. The AI will use only what you save here. Rules are saved on this phone\'s browser only.</p>';
     SUBS.forEach(sub=>{
@@ -138,6 +204,7 @@ function render(keepScroll){
   if(name==="Subreddit Research"){
     SUBS.forEach(sub=>{const t=document.getElementById("rules-"+sub);if(t&&d[sub])t.value=d[sub].text});
   }
+  if(name==="AI Agent"){updateNote()}
   document.title=(name==="Dashboard"?"":name+" · ")+"RedditPilot AI";
   if(!keepScroll)window.scrollTo(0,0);
 }
