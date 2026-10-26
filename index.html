@@ -5,35 +5,76 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>RedditPilot AI</title>
 <style>
-body{margin:0;font-family:system-ui,sans-serif;background:#f6f7f9;color:#1a1a1a}
-header{background:#fff;padding:14px 16px;border-bottom:1px solid #e3e5e8;font-weight:600}
-nav{display:flex;gap:8px;overflow-x:auto;padding:10px 12px;background:#fff;border-bottom:1px solid #e3e5e8}
-nav button{border:1px solid #d0d3d8;background:#fff;border-radius:16px;padding:8px 14px;white-space:nowrap;font-size:14px}
-nav button.on{background:#1a1a1a;color:#fff}
-main{padding:16px}
-.card{background:#fff;border:1px solid #e3e5e8;border-radius:10px;padding:14px;margin-bottom:12px}
-.tag{display:inline-block;background:#eceef1;border-radius:8px;padding:2px 8px;font-size:12px}
+:root{--bg:#faf8f3;--ink:#22332f;--muted:#6b7773;--line:#e6e2d8;--green:#e8eeea;--sand:#f3eee3;--tan:#c8895a;--dark:#24413a}
+*{box-sizing:border-box}
+body{margin:0;font-family:system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--ink);padding-bottom:90px}
+.mono{font-family:ui-monospace,Menlo,monospace;letter-spacing:.08em;text-transform:uppercase;font-size:11px;color:var(--muted)}
+.top{display:flex;justify-content:space-between;align-items:center;padding:14px 16px;border-bottom:1px solid var(--line)}
+.logo{display:flex;align-items:center;gap:10px;font-weight:700;font-size:19px}
+.logo i{width:34px;height:34px;border-radius:10px;background:var(--tan);color:#fff;display:flex;align-items:center;justify-content:center;font-style:normal}
+.logo b{color:var(--tan)}
+.pill{border:1px solid var(--line);border-radius:20px;padding:7px 11px;font-size:12px;color:var(--muted);background:#fff;white-space:nowrap}
+.pill:before{content:"●";color:var(--tan);margin-right:6px}
+main{padding:20px 16px}
+h1{font-size:34px;line-height:1.1;margin:8px 0 12px}
+h2{font-size:26px;margin:0 0 14px}
+p{color:var(--muted);line-height:1.5;margin:6px 0}
+.card{border:1px solid var(--line);border-radius:16px;padding:16px;margin:14px 0;background:#fff}
+.card.green{background:var(--green)}
+.card.sand{background:var(--sand)}
+.card h3{margin:0 0 4px;font-size:17px}
+.link{color:var(--dark);font-weight:700;background:none;border:0;padding:8px 0;font-size:14px}
+.row{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.tag{border-radius:12px;padding:4px 10px;background:#f6e9d6;color:#8a5a2b;font-size:11px;font-family:ui-monospace,Menlo,monospace}
+.item{padding:14px 0;border-top:1px solid var(--line)}
+.item:first-of-type{border-top:0}
+.foot{font-size:13px;color:var(--muted);margin-top:24px}
+#fab{position:fixed;right:16px;bottom:16px;width:58px;height:58px;border-radius:18px;background:var(--dark);color:#fff;font-size:24px;border:0}
+#menu{display:none;position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:5}
+#sheet{position:absolute;bottom:0;left:0;right:0;background:var(--bg);border-radius:20px 20px 0 0;padding:14px 16px 24px;max-height:80%;overflow:auto}
+#sheet button{display:block;width:100%;text-align:left;padding:14px 8px;border:0;border-bottom:1px solid var(--line);background:none;font-size:16px;color:var(--ink)}
+#sheet button.on{font-weight:700;color:var(--dark)}
 </style>
 </head>
 <body>
-<header>RedditPilot AI</header>
-<nav id="nav"></nav>
+<div class="top">
+  <div class="logo"><i>✦</i><span>Reddit<b>Pilot</b> AI</span></div>
+  <div class="pill">Reddit not connected</div>
+</div>
 <main id="main"></main>
+<button id="fab" onclick="toggleMenu()">☰</button>
+<div id="menu" onclick="toggleMenu()"><div id="sheet" onclick="event.stopPropagation()"></div></div>
 <script>
 const pages=["Dashboard","AI Agent","Post Generator","Comment Generator","Subreddit Research","Content Discovery","Pending Content","Account Safety","Analytics","Activity History","Notifications","Settings"];
+let current="Dashboard";
+function toggleMenu(){const m=document.getElementById("menu");m.style.display=m.style.display==="block"?"none":"block"}
 function show(name){
-  document.querySelectorAll("nav button").forEach(b=>b.classList.toggle("on",b.textContent===name));
-  let html='<h2>'+name+'</h2>';
+  current=name;
+  document.getElementById("menu").style.display="none";
+  const s=document.getElementById("sheet");
+  s.innerHTML="";
+  pages.forEach(p=>{const b=document.createElement("button");b.textContent=p;if(p===name)b.className="on";b.onclick=()=>show(p);s.appendChild(b)});
+  let h="";
   if(name==="Dashboard"){
-    html+='<div class="card"><b>Safety status</b><br><span class="tag">Unknown</span><p>Reddit is not connected yet, so no safety status can be verified.</p></div>';
-    html+='<div class="card"><b>Recommendation</b><p>Do nothing for now. This app is still being built.</p></div>';
+    h+='<div class="mono">Your Reddit workspace</div><h1>Good work starts with listening.</h1><p>A clear place to research conversations and prepare thoughtful content, while every decision stays yours.</p>';
+    h+='<div class="card green"><div class="row"><div><h3>Your workspace is ready for a careful start</h3><p>RedditPilot is not connected to Reddit, an AI agent, or Telegram. Integrations will be set up in later steps.</p></div></div><button class="link" onclick="show(\'Settings\')">Setup details ↗</button></div>';
+    h+='<div class="card sand"><div class="mono">Account safety</div><h3 style="margin-top:6px">Caution · Reddit isn\'t connected</h3><p>Account age, recent activity, moderation history, subreddit rules and API limits are unavailable. Nothing has been checked.</p><button class="link" onclick="show(\'Account Safety\')">Review safety ↗</button></div>';
+    h+='<div class="row" style="margin-top:24px"><h3 style="margin:0;font-weight:500;font-size:20px">Connection status</h3><span class="mono">Not connected</span></div>';
+    [["Reddit account","Not connected","No authorized Reddit account connected."],["AI agent","Inactive","The agent has not been set up and is inactive."],["Telegram notifications","Not connected","No Telegram integration connected."]].forEach(c=>{
+      h+='<div class="card"><div class="row"><h3>'+c[0]+'</h3><span class="tag">'+c[1]+'</span></div><p>'+c[2]+'</p></div>';
+    });
+    h+='<div class="card"><div class="row"><h3>Pending content</h3><span class="mono">No data</span></div><div style="text-align:center;padding:20px 0"><b>Nothing prepared yet</b><p>Drafts will appear here when you create them. Nothing is queued to post.</p></div></div>';
+    h+='<div class="card"><div class="row"><h3>Explore your workspace</h3><span class="mono">Available later</span></div>';
+    [["Post Generator","Not available yet"],["Subreddit Research","Not available yet"],["Activity History","No data yet"]].forEach(i=>{
+      h+='<div class="item"><b>'+i[0]+'</b><p style="margin:2px 0 0">'+i[1]+'</p></div>';
+    });
+    h+='</div><div class="foot">🔒 Human-led by design. RedditPilot will not post or send anything on your behalf from this workspace.</div>';
   } else {
-    html+='<div class="card"><span class="tag">Not built yet</span></div>';
+    h+='<h2>'+name+'</h2><div class="card"><span class="tag">Not built yet</span><p>This page will be added in a later step.</p></div>';
   }
-  document.getElementById("main").innerHTML=html;
+  document.getElementById("main").innerHTML=h;
+  window.scrollTo(0,0);
 }
-const nav=document.getElementById("nav");
-pages.forEach(p=>{const b=document.createElement("button");b.textContent=p;b.onclick=()=>show(p);nav.appendChild(b)});
 show("Dashboard");
 </script>
 </body>
