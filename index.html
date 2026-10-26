@@ -1,110 +1,318 @@
-const ALLOWED = "https://tm-063.github.io";
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>RedditPilot AI</title>
+<style>
+:root{--bg:#faf8f3;--ink:#22332f;--muted:#6b7773;--line:#e6e2d8;--green:#e8eeea;--sand:#f3eee3;--tan:#c8895a;--dark:#24413a;--grad:linear-gradient(120deg,#ffc27a 0%,#ff8a3d 45%,#e8603a 100%)}
+*{box-sizing:border-box}
+body{margin:0;font-family:system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--ink);padding-bottom:90px}
+.mono{font-family:ui-monospace,Menlo,monospace;letter-spacing:.08em;text-transform:uppercase;font-size:11px;color:var(--muted)}
+.gtext{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-fill-color:transparent}
+.top{display:flex;justify-content:space-between;align-items:center;padding:14px 16px;border-bottom:1px solid var(--line)}
+.logo{display:flex;align-items:center;gap:10px;font-weight:700;font-size:19px}
+.logo i{width:34px;height:34px;border-radius:10px;background:var(--grad);color:#fff;display:flex;align-items:center;justify-content:center;font-style:normal}
+.logo b{color:var(--tan)}
+.pill{border:1px solid var(--line);border-radius:20px;padding:7px 11px;font-size:12px;color:var(--muted);background:#fff;white-space:nowrap}
+.pill:before{content:"●";color:var(--tan);margin-right:6px}
+main{padding:20px 16px}
+h1{font-size:40px;line-height:1.1;margin:10px 0 14px}
+h2{font-size:26px;margin:0 0 14px}
+p{color:var(--muted);line-height:1.5;margin:6px 0}
+.card{border:1px solid var(--line);border-radius:16px;padding:16px;margin:14px 0;background:#fff}
+.card.green{background:var(--green)}
+.card.sand{background:var(--sand)}
+.card h3{margin:0 0 4px;font-size:17px}
+.link{color:var(--dark);font-weight:700;background:none;border:0;padding:8px 0;font-size:14px;text-decoration:none;display:inline-block}
+.back{color:var(--dark);font-weight:600;background:none;border:0;padding:0 0 14px;font-size:15px}
+.row{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.tag{border-radius:12px;padding:4px 10px;background:#f6e9d6;color:#8a5a2b;font-size:11px;font-family:ui-monospace,Menlo,monospace;white-space:nowrap}
+.tag.ok{background:#dcebe1;color:#24543a}
+.item{padding:14px 0;border-top:1px solid var(--line)}
+.item:first-of-type{border-top:0}
+.foot{font-size:13px;color:var(--muted);margin-top:24px}
+textarea{width:100%;min-height:140px;margin-top:10px;padding:12px;border:1px solid var(--line);border-radius:12px;font-size:15px;font-family:inherit;background:var(--bg);color:var(--ink);resize:vertical}
+.btn{border:0;border-radius:12px;padding:12px 16px;font-size:15px;background:var(--dark);color:#fff;margin-top:10px;margin-right:8px}
+.btn.alt{background:#fff;color:var(--dark);border:1px solid var(--line)}
+.err{color:#9a3b2e}
+.hero{min-height:78vh;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:12px 8px;background:radial-gradient(circle at 50% 30%,rgba(255,170,90,.22),rgba(250,248,243,0) 62%)}
+.hero p{max-width:420px;font-size:16px}
+.cta{border:0;border-radius:16px;padding:16px 34px;font-size:17px;font-weight:700;color:#fff;background:var(--grad);box-shadow:0 8px 26px rgba(232,96,58,.38);margin-top:22px}
+.chatwrap{padding:1.5px;border-radius:22px;background:var(--grad);box-shadow:0 10px 36px rgba(255,138,61,.22);margin:14px 0}
+.chat{background:#fff;border-radius:20.5px;padding:14px}
+.chead{display:flex;justify-content:space-between;align-items:center;position:relative}
+.picker{border:1px solid var(--line);background:var(--bg);border-radius:20px;padding:8px 13px;font-size:14px;font-weight:600;color:var(--ink)}
+.plist{display:none;position:absolute;top:46px;left:0;background:#fff;border:1px solid var(--line);border-radius:14px;box-shadow:0 12px 30px rgba(0,0,0,.14);z-index:4;min-width:250px;overflow:hidden}
+.plist button{display:flex;justify-content:space-between;gap:12px;width:100%;padding:13px 14px;border:0;border-bottom:1px solid var(--line);background:#fff;font-size:15px;color:var(--ink);text-align:left}
+.plist button.on{background:var(--sand);font-weight:700}
+.log{min-height:170px;max-height:55vh;overflow-y:auto;padding:12px 2px;display:flex;flex-direction:column;gap:10px}
+.empty{margin:auto;text-align:center;padding:20px 8px}
+.msg{max-width:92%;padding:10px 13px;border-radius:16px;line-height:1.5;font-size:15px;white-space:pre-wrap;word-wrap:break-word}
+.msg.user{align-self:flex-end;background:var(--dark);color:#fff;border-bottom-right-radius:4px}
+.msg.ai{align-self:flex-start;background:var(--sand);color:var(--ink);border-bottom-left-radius:4px}
+.msg.note{align-self:center;background:none;color:var(--muted);font-size:13px;text-align:center}
+.msg.note.bad{color:#9a3b2e}
+.mrow{align-self:flex-start;display:flex;gap:8px;align-items:center;margin-top:-4px}
+.mini{border:1px solid var(--line);background:#fff;border-radius:10px;padding:5px 10px;font-size:12px;color:var(--dark)}
+.cnote{margin:4px 0 8px}
+.cnote p{margin:4px 0;font-size:13px}
+.inrow{display:flex;gap:8px;align-items:flex-end;border:1px solid var(--line);border-radius:18px;padding:8px;background:var(--bg)}
+.cin{flex:1;border:0;background:transparent;min-height:44px;max-height:140px;margin:0;padding:8px;resize:none;outline:none;border-radius:0}
+.send{width:44px;height:44px;border-radius:14px;border:0;background:var(--grad);color:#fff;font-size:20px;flex:none}
+.send:disabled{opacity:.4}
+#fab{position:fixed;right:16px;bottom:16px;width:58px;height:58px;border-radius:18px;background:var(--dark);color:#fff;font-size:24px;border:0}
+#menu{display:none;position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:5}
+#sheet{position:absolute;bottom:0;left:0;right:0;background:var(--bg);border-radius:20px 20px 0 0;padding:14px 16px 24px;max-height:80%;overflow:auto}
+#sheet button{display:block;width:100%;text-align:left;padding:14px 8px;border:0;border-bottom:1px solid var(--line);background:none;font-size:16px;color:var(--ink)}
+#sheet button.on{font-weight:700;color:var(--dark)}
+</style>
+</head>
+<body>
+<div class="top" id="topbar">
+  <div class="logo" onclick="show('Welcome')"><i>✦</i><span>Reddit<b>Pilot</b> AI</span></div>
+  <div class="pill">Reddit not connected</div>
+</div>
+<main id="main"></main>
+<button id="fab" onclick="toggleMenu()">☰</button>
+<div id="menu" onclick="toggleMenu()"><div id="sheet" onclick="event.stopPropagation()"></div></div>
+<script>
+const AGENT_URL="https://redditpilot-agent.subsbooster123.workers.dev/";
+const pages=["Dashboard","AI Agent","Post Generator","Comment Generator","Subreddit Research","Content Discovery","Pending Content","Account Safety","Analytics","Activity History","Notifications","Settings"];
+const SUBS=["AppliedBiology","FemaleLifespan","HumanBiohacking","BiohackingForBeginner","PeptideBiotech"];
+const LIMIT=5800;
+let chat=[];
+let busy=false;
 
-const RULES = `You are the careful assistant inside RedditPilot AI, a personal Reddit research tool.
-You never post anything. The human decides everything.
-Account safety and subreddit rules matter more than activity. Doing nothing is a valid and often best answer.
-You only know what the user pasted. You cannot see Reddit, the account, or its history. If something is unknown, say so.
-Never invent personal experiences, sources, statistics, quotes, or account-age limits.
+function getSub(){try{const s=localStorage.getItem("rp_sub");if(SUBS.indexOf(s)>-1)return s}catch(e){}return SUBS[0]}
+let curSub=getSub();
+function setSubStore(s){try{localStorage.setItem("rp_sub",s)}catch(e){}}
+function markOk(){try{localStorage.setItem("rp_ai_ok",new Date().toISOString())}catch(e){}}
+function getOk(){try{return localStorage.getItem("rp_ai_ok")}catch(e){return null}}
 
-Reply with exactly these parts:
-RECOMMENDATION: one of POST, COMMENT, WAIT, DO NOTHING
-WHY: 2-4 short points
-RISKS: short points
-DRAFT: only if the recommendation is POST or COMMENT, otherwise write "None".
+function slug(p){return p.toLowerCase().replace(/ /g,"-")}
+function currentPage(){
+  const s=location.hash.replace("#/","").replace("#","");
+  if(s===""||s==="welcome")return "Welcome";
+  return pages.find(p=>slug(p)===s)||"Dashboard";
+}
+function show(name){
+  if(location.hash==="#/"+slug(name)){render(false)}
+  else{location.hash="#/"+slug(name)}
+}
+function goBack(){
+  if(history.length>1){history.back()}else{show("Dashboard")}
+}
+window.addEventListener("hashchange",function(){render(false)});
 
-AI-CONTENT CHECK: If the saved rules mention AI-generated or AI-assisted content (banned, limited, or must be disclosed), say so clearly in RISKS and recommend WAIT or DO NOTHING unless the rules clearly allow it. If the rules say nothing about it, tell the user to check with the moderators when unsure. Never claim a draft will pass AI detectors. Remind the user to edit the draft and add their own real details.
+function loadRules(){
+  try{return JSON.parse(localStorage.getItem("rp_rules")||"{}")}catch(e){return {}}
+}
+function storeRules(d){
+  try{localStorage.setItem("rp_rules",JSON.stringify(d));return true}catch(e){return false}
+}
+function saveRules(sub){
+  const t=document.getElementById("rules-"+sub).value.trim();
+  const d=loadRules();
+  if(t){d[sub]={text:t,date:new Date().toISOString()}}else{delete d[sub]}
+  if(!storeRules(d)){alert("This browser would not let the app save. Try Chrome or Brave, not private mode.");return}
+  render(true);
+}
+function clearRules(sub){
+  if(!confirm("Delete the saved rules for r/"+sub+"?"))return;
+  const d=loadRules();delete d[sub];storeRules(d);
+  render(true);
+}
+function toggleMenu(){const m=document.getElementById("menu");m.style.display=m.style.display==="block"?"none":"block"}
 
-WRITING RULES FOR EVERY DRAFT. Use judgment, but never break these.
-
-Goal: write like a thoughtful real person posting in this community. Plain, direct, matched to the subreddit's tone. Every sentence must earn its place.
-
-Words:
-- Use simple, precise words. Say "is" not "serves as", "uses" not "utilizes", "has" not "boasts".
-- Never use: delve, tapestry, testament, pivotal, crucial, vital, multifaceted, landscape (as a metaphor), realm, vibrant, underscore, bolster, foster, showcase, enduring, intricate, groundbreaking, transformative, elevate, journey, unlock, game-changer, navigate, "in today's world", "it's important to note", "it is worth noting", "plays a key role", "a deeper understanding", "valuable insights", "shed light on", "let's dive in".
-- Do not swap in thesaurus synonyms. Repeat a word when that is clearer.
-- No cliches, jargon, or motivational language. Do not inflate the importance of ordinary things.
-
-Sentences:
-- Vary sentence length naturally. Short sentences are fine. Do not start several sentences in a row the same way.
-- Do not start paragraphs with Furthermore, Moreover, or Additionally.
-- Do not tack on phrases like "highlighting its importance". Do not end paragraphs with "This highlights...", "This underscores...", or "This reflects...".
-- Do not use "not just X but Y" or "it's not X, it's Y". Do not ask a question and then answer it. Do not group things in threes out of habit. Do not stack adjectives.
-- Use contractions in casual posts.
-- Never add deliberate typos or mistakes to seem human.
-
-Substance:
-- Start with the point. Do not restate the question, praise the topic, or announce what the post will cover.
-- Be specific. Use concrete facts, examples, and mechanisms. Say how things actually relate instead of calling them connected or influential.
-- Do not pad. Do not repeat the same point in different words.
-- Separate facts from interpretation and uncertainty. When something is unknown, say so plainly instead of filling the gap with general statements.
-- Never invent a personal story, experiment, result, number, quote, source, or link. Never write "in my experience" or "I tried" unless the user said it happened. Do not claim feelings or memories.
-- No broad claims about society, history, or the future.
-
-Formatting:
-- Plain paragraphs only. No headings, no bold, no emojis, no tables. Bullet points only if the subreddit clearly expects them.
-- Avoid long dashes. Use commas or full stops. Use ordinary punctuation.
-
-Endings and tone:
-- Stop when the point is made. No summary, no moral, no offer of help, no "I hope this helps".
-- No flattery and no stock openers like "Certainly" or "Great question". Never write "As an AI" or mention being an assistant inside a draft.
-
-Health: for biology, biohacking and peptide topics, give no medical advice, no dosing, no sourcing or vendors, and do not state unproven claims as fact.
-
-Keep drafts shorter than you think they should be. Cut anything that adds no information. Before answering, silently check the draft against these rules and fix it. These rules are a quality standard, not a checklist. Clear, accurate, specific writing matters more than following any rule mechanically.`;
-
-export default {
-  async fetch(request, env) {
-    const cors = {
-      "Access-Control-Allow-Origin": ALLOWED,
-      "Access-Control-Allow-Methods": "POST, OPTIONS",
-      "Access-Control-Allow-Headers": "Content-Type",
-    };
-    const reply = (obj, status = 200) =>
-      new Response(JSON.stringify(obj), {
-        status,
-        headers: { ...cors, "Content-Type": "application/json" },
-      });
-
-    if (request.method === "OPTIONS") return new Response(null, { headers: cors });
-    if (request.method === "GET") return new Response("RedditPilot agent is running.");
-    if (request.method !== "POST") return reply({ error: "Method not allowed" }, 405);
-    if (request.headers.get("Origin") !== ALLOWED) return reply({ error: "Not allowed" }, 403);
-
-    let prompt = "";
-    try {
-      const body = await request.json();
-      prompt = String(body.prompt || "").slice(0, 6000);
-    } catch (e) {
-      return reply({ error: "Bad request" }, 400);
+/* ---------- chat ---------- */
+function chatHTML(){
+  return '<div class="chatwrap"><div class="chat">'+
+  '<div class="chead"><button class="picker" id="picker" onclick="togglePicker()"></button><div class="plist" id="plist"></div><button class="link" onclick="newChat()">New chat</button></div>'+
+  '<div class="log" id="log"></div>'+
+  '<div class="cnote" id="cnote"></div>'+
+  '<div class="inrow"><textarea class="cin" id="cin" rows="1" placeholder="Describe your idea..."></textarea><button class="send" id="send" onclick="sendMsg()">↑</button></div>'+
+  '</div></div>';
+}
+function initChat(){updatePicker();drawLog();updateNote()}
+function updatePicker(){
+  const rules=loadRules();
+  document.getElementById("picker").textContent="r/"+curSub+" ▾";
+  const pl=document.getElementById("plist");
+  pl.innerHTML="";
+  SUBS.forEach(function(s){
+    const b=document.createElement("button");
+    if(s===curSub)b.className="on";
+    const a=document.createElement("span");a.textContent="r/"+s;
+    const c=document.createElement("span");c.textContent=rules[s]?"● rules saved":"○ no rules";
+    c.style.fontSize="12px";c.style.color="#6b7773";
+    b.appendChild(a);b.appendChild(c);
+    b.onclick=function(){pickSub(s)};
+    pl.appendChild(b);
+  });
+}
+function togglePicker(){const pl=document.getElementById("plist");pl.style.display=pl.style.display==="block"?"none":"block"}
+function pickSub(s){
+  document.getElementById("plist").style.display="none";
+  if(s===curSub)return;
+  curSub=s;setSubStore(s);
+  if(chat.length){chat.push({role:"note",text:"Switched to r/"+s+". Earlier messages are not used for this community.",sub:s})}
+  updatePicker();drawLog();updateNote();
+}
+function newChat(){chat=[];drawLog()}
+function drawLog(){
+  const log=document.getElementById("log");
+  log.innerHTML="";
+  if(!chat.length){
+    log.innerHTML='<div class="empty"><div class="gtext" style="font-size:24px;font-weight:700">Ask RedditPilot</div><p>Pick a community above, then describe an idea. I check it against the rules you saved and tell you whether to post, comment, wait, or do nothing.</p></div>';
+    return;
+  }
+  chat.forEach(function(m){
+    const d=document.createElement("div");
+    d.className="msg "+m.role+(m.bad?" bad":"");
+    d.textContent=m.text;
+    log.appendChild(d);
+    if(m.role==="ai"&&!m.pending){
+      const r=document.createElement("div");r.className="mrow";
+      const t=document.createElement("span");t.className="tag";t.textContent="Not posted";
+      const cb=document.createElement("button");cb.className="mini";cb.textContent="Copy";
+      cb.onclick=function(){
+        if(navigator.clipboard){navigator.clipboard.writeText(m.text).then(function(){cb.textContent="Copied"},function(){alert("Could not copy. Long-press the text to copy it.")})}
+        else{alert("Could not copy. Long-press the text to copy it.")}
+      };
+      r.appendChild(t);r.appendChild(cb);log.appendChild(r);
     }
-    if (!prompt.trim()) return reply({ error: "Empty message" }, 400);
+  });
+  log.scrollTop=log.scrollHeight;
+}
+function updateNote(){
+  const n=document.getElementById("cnote");
+  const btn=document.getElementById("send");
+  if(!n||!btn)return;
+  const r=loadRules()[curSub];
+  if(r){n.innerHTML="";btn.disabled=busy}
+  else{
+    n.innerHTML='<span class="tag">No rules saved</span><p>Save the rules for r/'+curSub+' first, so the AI does not guess them.</p><button class="link" onclick="show(\'Subreddit Research\')">Go to Subreddit Research ›</button>';
+    btn.disabled=true;
+  }
+}
+function pre(sub){
+  return "You are advising on a possible Reddit contribution for r/"+sub+".\nThe ONLY subreddit rules you know are the ones pasted below. Do not assume any other rules.\nIf the idea would break any saved rule, say so clearly and recommend WAIT or DO NOTHING.\nThis is a chat. If the message is a follow-up, use the earlier conversation, and still reply in the required format.\n\n";
+}
+async function sendMsg(){
+  if(busy)return;
+  const inp=document.getElementById("cin");
+  const topic=inp.value.trim();
+  const sub=curSub;
+  const r=loadRules()[sub];
+  if(!r){updateNote();return}
+  if(!topic)return;
+  const head=pre(sub)+"SAVED RULES FOR r/"+sub+":\n"+r.text+"\n\n";
+  const tail="USER'S MESSAGE:\n"+topic;
+  const base=head.length+tail.length;
+  if(base>LIMIT){
+    chat.push({role:"note",bad:true,text:"This is too long ("+base+" characters, the limit is "+LIMIT+"). Shorten your message or the saved rules for r/"+sub+".",sub:sub});
+    drawLog();return;
+  }
+  let lastNote=-1;
+  chat.forEach(function(m,i){if(m.role==="note")lastNote=i});
+  const prev=chat.slice(lastNote+1).filter(function(m){return (m.role==="user"||m.role==="ai")&&!m.pending});
+  let hist="";
+  let room=LIMIT-base-60;
+  for(let i=prev.length-1;i>=0;i--){
+    const line=(prev[i].role==="user"?"User: ":"Agent: ")+prev[i].text.slice(0,700)+"\n";
+    if(line.length>room)break;
+    hist=line+hist;room-=line.length;
+  }
+  const prompt=head+(hist?"EARLIER IN THIS CHAT:\n"+hist+"\n":"")+tail;
+  chat.push({role:"user",text:topic,sub:sub});
+  const pend={role:"ai",text:"Thinking...",sub:sub,pending:true};
+  chat.push(pend);
+  inp.value="";
+  busy=true;updateNote();drawLog();
+  try{
+    const res=await fetch(AGENT_URL,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({prompt:prompt})});
+    const data=await res.json();
+    if(!res.ok||data.error){throw new Error(data.error||("Error "+res.status))}
+    pend.text=data.text;pend.pending=false;markOk();
+  }catch(e){
+    pend.role="note";pend.bad=true;pend.pending=false;
+    pend.text="Something went wrong: "+e.message;
+  }
+  busy=false;
+  if(document.getElementById("log")){drawLog();updateNote()}
+}
 
-    const res = await fetch(
-      "https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "x-goog-api-key": env.GEMINI_KEY_API,
-        },
-        body: JSON.stringify({
-          systemInstruction: { parts: [{ text: RULES }] },
-          contents: [{ role: "user", parts: [{ text: prompt }] }],
-        }),
+/* ---------- pages ---------- */
+function render(keepScroll){
+  const name=currentPage();
+  const home=name==="Welcome";
+  document.getElementById("menu").style.display="none";
+  document.getElementById("topbar").style.display=home?"none":"flex";
+  document.getElementById("fab").style.display=home?"none":"block";
+  const s=document.getElementById("sheet");
+  s.innerHTML="";
+  const hb=document.createElement("button");hb.textContent="Home";hb.onclick=function(){show("Welcome")};s.appendChild(hb);
+  pages.forEach(p=>{const b=document.createElement("button");b.textContent=p;if(p===name)b.className="on";b.onclick=()=>show(p);s.appendChild(b)});
+  const d=loadRules();
+  const saved=Object.keys(d).length;
+  let h="";
+  if(name!=="Dashboard"&&!home){h+='<button class="back" onclick="goBack()">‹ Back</button>'}
+  if(home){
+    h+='<div class="hero"><div class="mono">Your personal Reddit assistant</div><h1>Welcome to <span class="gtext">RedditPilot AI</span></h1><p>Research communities, check your ideas against their rules, and prepare thoughtful drafts. You stay in control of everything you post.</p><button class="cta" onclick="show(\'Dashboard\')">Get started</button><div class="foot">🔒 Nothing is ever posted or sent for you.</div></div>';
+  } else if(name==="Dashboard"){
+    h+='<div class="mono">Your Reddit workspace</div><h2 style="margin-top:6px">Ask <span class="gtext">RedditPilot</span></h2>';
+    h+=chatHTML();
+    h+='<div class="card sand"><div class="mono">Account safety</div><h3 style="margin-top:6px">Caution · Reddit isn\'t connected</h3><p>Account age, recent activity, moderation history and API limits are unavailable. Nothing has been checked.</p><button class="link" onclick="show(\'Account Safety\')">Review safety ↗</button></div>';
+    const ok=getOk();
+    const aiTag=ok?'<span class="tag ok">Working</span>':'<span class="tag">Not tested</span>';
+    const aiText=ok?'Last successful answer: '+new Date(ok).toLocaleString()+'.':'Set up on Cloudflare. Ask it something above to test it.';
+    h+='<div class="row" style="margin-top:24px"><h3 style="margin:0;font-weight:500;font-size:20px">Connection status</h3><span class="mono">Partly set up</span></div>';
+    h+='<div class="card"><div class="row"><h3>Reddit account</h3><span class="tag">Not connected</span></div><p>No authorized Reddit account connected.</p></div>';
+    h+='<div class="card"><div class="row"><h3>AI agent</h3>'+aiTag+'</div><p>'+aiText+'</p></div>';
+    h+='<div class="card"><div class="row"><h3>Telegram notifications</h3><span class="tag">Not connected</span></div><p>No Telegram integration connected.</p></div>';
+    h+='<div class="card"><div class="row"><h3>Pending content</h3><span class="mono">No data</span></div><div style="text-align:center;padding:20px 0"><b>Nothing prepared yet</b><p>Drafts will appear here when you create them. Nothing is queued to post.</p></div></div>';
+    h+='<div class="card"><div class="row"><h3>Explore your workspace</h3><span class="mono">Workspace</span></div>';
+    h+='<div class="item" onclick="show(\'Subreddit Research\')"><b>Subreddit Research ›</b><p style="margin:2px 0 0">'+saved+' of '+SUBS.length+' communities have rules saved</p></div>';
+    h+='<div class="item"><b>Post Generator</b><p style="margin:2px 0 0">Not available yet</p></div>';
+    h+='<div class="item"><b>Activity History</b><p style="margin:2px 0 0">No data yet</p></div></div>';
+    h+='<div class="foot">🔒 Human-led by design. RedditPilot will not post or send anything on your behalf from this workspace.</div>';
+  } else if(name==="AI Agent"){
+    h+='<h2>AI <span class="gtext">Agent</span></h2>';
+    h+=chatHTML();
+    h+='<div class="foot">Free AI limits apply. If you see a limit message, wait a while and try again. Do not put private information in your messages. The chat is cleared when you refresh the page.</div>';
+  } else if(name==="Subreddit Research"){
+    h+='<h2>Subreddit Research</h2><p>Open each community\'s rules on Reddit, copy them, and paste them below. The AI will use only what you save here. Rules are saved on this phone\'s browser only.</p>';
+    SUBS.forEach(sub=>{
+      const r=d[sub];
+      let status='<span class="tag">No rules saved</span>';
+      let note='';
+      if(r){
+        status='<span class="tag ok">Rules saved</span>';
+        const dt=new Date(r.date);
+        const days=Math.floor((Date.now()-dt.getTime())/86400000);
+        note='<p>Saved on '+dt.toLocaleDateString()+(days>30?'. This is over 30 days old, so please check Reddit for rule changes.':'.')+'</p>';
       }
-    );
-
-    if (res.status === 429) return reply({ error: "Free limit reached. Try again later." }, 429);
-    if (!res.ok) return reply({ error: "AI error (" + res.status + ")" }, 502);
-
-    const data = await res.json();
-    const text =
-      (data.candidates &&
-        data.candidates[0] &&
-        data.candidates[0].content &&
-        data.candidates[0].content.parts &&
-        data.candidates[0].content.parts.map((p) => p.text || "").join("")) ||
-      "";
-    return reply({ text: text || "No answer returned." });
-  },
-};
+      h+='<div class="card"><div class="row"><h3>r/'+sub+'</h3>'+status+'</div>'+note;
+      h+='<a class="link" href="https://www.reddit.com/r/'+sub+'/about/rules" target="_blank" rel="noopener">Open rules on Reddit ↗</a>';
+      h+='<textarea id="rules-'+sub+'" placeholder="Paste the rules here. Include notes on links, self-promotion, flair, and allowed post types."></textarea>';
+      h+='<div><button class="btn" onclick="saveRules(\''+sub+'\')">Save rules</button>';
+      if(r)h+='<button class="btn alt" onclick="clearRules(\''+sub+'\')">Delete</button>';
+      h+='</div></div>';
+    });
+    h+='<div class="foot">If you clear your browser data, saved rules are removed and you would need to paste them again.</div>';
+  } else {
+    h+='<h2>'+name+'</h2><div class="card"><span class="tag">Not built yet</span><p>This page will be added in a later step.</p></div>';
+  }
+  document.getElementById("main").innerHTML=h;
+  if(name==="Subreddit Research"){
+    SUBS.forEach(sub=>{const t=document.getElementById("rules-"+sub);if(t&&d[sub])t.value=d[sub].text});
+  }
+  if(name==="Dashboard"||name==="AI Agent"){initChat()}
+  document.title=(name==="Dashboard"||home?"":name+" · ")+"RedditPilot AI";
+  if(!keepScroll)window.scrollTo(0,0);
+}
+render(false);
+</script>
+</body>
+</html>
