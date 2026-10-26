@@ -4,74 +4,105 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>RedditPilot AI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
 <style>
-:root{--bg:#faf8f3;--ink:#22332f;--muted:#6b7773;--line:#e6e2d8;--green:#e8eeea;--sand:#f3eee3;--tan:#c8895a;--dark:#24413a;--grad:linear-gradient(120deg,#ffc27a 0%,#ff8a3d 45%,#e8603a 100%)}
+:root{--bg:#030a12;--panel:rgba(8,24,40,.72);--line:rgba(61,224,255,.28);--cy:#3de0ff;--cy2:#00a8ff;--ink:#d8f4ff;--muted:#7fa6b8;--warn:#ffb347;--bad:#ff7a7a;--ok:#4dffb0;--head:"Orbitron","Segoe UI",system-ui,sans-serif}
 *{box-sizing:border-box}
-body{margin:0;font-family:system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--ink);padding-bottom:90px}
-.mono{font-family:ui-monospace,Menlo,monospace;letter-spacing:.08em;text-transform:uppercase;font-size:11px;color:var(--muted)}
-.gtext{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-fill-color:transparent}
-.top{display:flex;justify-content:space-between;align-items:center;padding:14px 16px;border-bottom:1px solid var(--line)}
-.logo{display:flex;align-items:center;gap:10px;font-weight:700;font-size:19px}
-.logo i{width:34px;height:34px;border-radius:10px;background:var(--grad);color:#fff;display:flex;align-items:center;justify-content:center;font-style:normal}
-.logo b{color:var(--tan)}
-.pill{border:1px solid var(--line);border-radius:20px;padding:7px 11px;font-size:12px;color:var(--muted);background:#fff;white-space:nowrap}
-.pill:before{content:"●";color:var(--tan);margin-right:6px}
+html{scroll-behavior:smooth}
+body{margin:0;font-family:system-ui,-apple-system,sans-serif;color:var(--ink);padding-bottom:90px;min-height:100vh;background-color:var(--bg);background-image:radial-gradient(ellipse at 50% -10%,rgba(0,168,255,.24),transparent 55%),linear-gradient(rgba(61,224,255,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(61,224,255,.05) 1px,transparent 1px);background-size:auto,36px 36px,36px 36px;background-attachment:fixed}
+button{font-family:inherit;transition:transform .2s ease,box-shadow .25s ease,background .25s ease,opacity .25s ease,border-color .25s ease}
+button:active{transform:scale(.97)}
+.mono{font-family:ui-monospace,Menlo,monospace;letter-spacing:.14em;text-transform:uppercase;font-size:11px;color:var(--muted)}
+.gtext{background:linear-gradient(90deg,#aef4ff,#3de0ff,#00a8ff);-webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-fill-color:transparent}
+.top{display:flex;justify-content:space-between;align-items:center;padding:14px 16px;border-bottom:1px solid var(--line);background:rgba(3,10,18,.7);backdrop-filter:blur(8px)}
+.logo{display:flex;align-items:center;gap:10px;font-family:var(--head);font-weight:700;font-size:15px;letter-spacing:.08em}
+.logo i{width:30px;height:30px;border-radius:50%;border:2px solid var(--cy);box-shadow:0 0 12px var(--cy),inset 0 0 8px rgba(61,224,255,.6);position:relative;display:block}
+.logo i:after{content:"";position:absolute;inset:8px;border-radius:50%;background:var(--cy);box-shadow:0 0 10px var(--cy)}
+.logo b{color:var(--cy)}
+.pill{border:1px solid rgba(255,179,71,.45);border-radius:20px;padding:6px 11px;font-size:11px;color:var(--warn);background:rgba(255,179,71,.07);white-space:nowrap;letter-spacing:.06em;text-transform:uppercase}
 main{padding:20px 16px}
-h1{font-size:40px;line-height:1.1;margin:10px 0 14px}
-h2{font-size:26px;margin:0 0 14px}
-p{color:var(--muted);line-height:1.5;margin:6px 0}
-.card{border:1px solid var(--line);border-radius:16px;padding:16px;margin:14px 0;background:#fff}
-.card.green{background:var(--green)}
-.card.sand{background:var(--sand)}
-.card h3{margin:0 0 4px;font-size:17px}
-.link{color:var(--dark);font-weight:700;background:none;border:0;padding:8px 0;font-size:14px;text-decoration:none;display:inline-block}
-.back{color:var(--dark);font-weight:600;background:none;border:0;padding:0 0 14px;font-size:15px}
+main.page{animation:fadeUp .45s cubic-bezier(.2,.8,.2,1)}
+h1{font-family:var(--head);font-size:28px;line-height:1.2;margin:14px 0 14px;letter-spacing:.06em;text-transform:uppercase}
+h2{font-family:var(--head);font-size:21px;margin:0 0 14px;letter-spacing:.06em;text-transform:uppercase}
+p{color:var(--muted);line-height:1.55;margin:6px 0}
+.card,.hud{position:relative;background:var(--panel);border:1px solid var(--line);border-radius:6px;backdrop-filter:blur(6px)}
+.card{padding:16px;margin:14px 0}
+.card:before,.hud:before{content:"";position:absolute;top:-1px;left:-1px;width:14px;height:14px;border-top:2px solid var(--cy);border-left:2px solid var(--cy);border-top-left-radius:6px}
+.card:after,.hud:after{content:"";position:absolute;bottom:-1px;right:-1px;width:14px;height:14px;border-bottom:2px solid var(--cy);border-right:2px solid var(--cy);border-bottom-right-radius:6px}
+.card h3{margin:0 0 4px;font-size:15px;letter-spacing:.04em}
+.link{color:var(--cy);font-weight:600;background:none;border:0;padding:8px 0;font-size:14px;text-decoration:none;display:inline-block}
+.back{color:var(--cy);font-weight:600;background:none;border:0;padding:0 0 14px;font-size:15px}
 .row{display:flex;justify-content:space-between;align-items:center;gap:10px}
-.tag{border-radius:12px;padding:4px 10px;background:#f6e9d6;color:#8a5a2b;font-size:11px;font-family:ui-monospace,Menlo,monospace;white-space:nowrap}
-.tag.ok{background:#dcebe1;color:#24543a}
+.tag{border-radius:4px;padding:4px 9px;border:1px solid rgba(255,179,71,.45);background:rgba(255,179,71,.08);color:var(--warn);font-size:10.5px;font-family:ui-monospace,Menlo,monospace;letter-spacing:.08em;text-transform:uppercase;white-space:nowrap}
+.tag.ok{border-color:rgba(77,255,176,.5);background:rgba(77,255,176,.08);color:var(--ok)}
+.tag.info{border-color:var(--line);background:rgba(61,224,255,.08);color:var(--cy)}
 .item{padding:14px 0;border-top:1px solid var(--line)}
 .item:first-of-type{border-top:0}
 .foot{font-size:13px;color:var(--muted);margin-top:24px}
-textarea{width:100%;min-height:140px;margin-top:10px;padding:12px;border:1px solid var(--line);border-radius:12px;font-size:15px;font-family:inherit;background:var(--bg);color:var(--ink);resize:vertical}
-.btn{border:0;border-radius:12px;padding:12px 16px;font-size:15px;background:var(--dark);color:#fff;margin-top:10px;margin-right:8px}
-.btn.alt{background:#fff;color:var(--dark);border:1px solid var(--line)}
-.err{color:#9a3b2e}
-.hero{min-height:78vh;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:12px 8px;background:radial-gradient(circle at 50% 30%,rgba(255,170,90,.22),rgba(250,248,243,0) 62%)}
+textarea{width:100%;min-height:140px;margin-top:10px;padding:12px;border:1px solid var(--line);border-radius:4px;font-size:15px;font-family:inherit;background:rgba(0,10,20,.6);color:var(--ink);resize:vertical;transition:border-color .25s,box-shadow .25s}
+textarea:focus{outline:none;border-color:var(--cy);box-shadow:0 0 14px rgba(61,224,255,.25)}
+.btn{border:1px solid var(--cy);border-radius:4px;padding:11px 16px;font-size:13px;background:rgba(0,168,255,.2);color:#eaffff;margin-top:10px;margin-right:8px;letter-spacing:.1em;text-transform:uppercase}
+.btn.alt{background:transparent;color:var(--muted);border-color:var(--line)}
+.hero{min-height:80vh;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:12px 8px}
 .hero p{max-width:420px;font-size:16px}
-.cta{border:0;border-radius:16px;padding:16px 34px;font-size:17px;font-weight:700;color:#fff;background:var(--grad);box-shadow:0 8px 26px rgba(232,96,58,.38);margin-top:22px}
-.chatwrap{padding:1.5px;border-radius:22px;background:var(--grad);box-shadow:0 10px 36px rgba(255,138,61,.22);margin:14px 0}
-.chat{background:#fff;border-radius:20.5px;padding:14px}
-.chead{display:flex;justify-content:space-between;align-items:center;position:relative}
-.picker{border:1px solid var(--line);background:var(--bg);border-radius:20px;padding:8px 13px;font-size:14px;font-weight:600;color:var(--ink)}
-.plist{display:none;position:absolute;top:46px;left:0;background:#fff;border:1px solid var(--line);border-radius:14px;box-shadow:0 12px 30px rgba(0,0,0,.14);z-index:4;min-width:250px;overflow:hidden}
-.plist button{display:flex;justify-content:space-between;gap:12px;width:100%;padding:13px 14px;border:0;border-bottom:1px solid var(--line);background:#fff;font-size:15px;color:var(--ink);text-align:left}
-.plist button.on{background:var(--sand);font-weight:700}
-.log{min-height:170px;max-height:55vh;overflow-y:auto;padding:12px 2px;display:flex;flex-direction:column;gap:10px}
+.reactor{width:180px;height:180px;position:relative;margin:0 auto 22px}
+.reactor span{position:absolute;border-radius:50%}
+.reactor .r1{inset:0;border:2px solid rgba(61,224,255,.5);box-shadow:0 0 28px rgba(61,224,255,.35),inset 0 0 26px rgba(61,224,255,.2)}
+.reactor .r2{inset:16px;border:2px dashed rgba(61,224,255,.6);animation:spin 16s linear infinite}
+.reactor .r3{inset:36px;border:3px solid rgba(61,224,255,.85);border-top-color:transparent;border-bottom-color:transparent;animation:spin 7s linear infinite reverse}
+.reactor .r4{inset:62px;background:radial-gradient(circle,#fff 0%,#a8f3ff 35%,rgba(61,224,255,.25) 70%,transparent 72%);box-shadow:0 0 44px 10px rgba(61,224,255,.55);animation:pulse 3.4s ease-in-out infinite}
+.cta,.gen{border:1px solid var(--cy);border-radius:4px;color:#eaffff;background:linear-gradient(135deg,rgba(0,168,255,.4),rgba(61,224,255,.14));box-shadow:0 0 20px rgba(61,224,255,.3);letter-spacing:.16em;text-transform:uppercase;font-weight:700}
+.cta{padding:16px 38px;font-size:15px;margin-top:22px}
+.gen{width:100%;padding:14px;font-size:14px;margin:4px 0 10px}
+.cta:hover,.gen:hover{box-shadow:0 0 30px rgba(61,224,255,.5)}
+.gen:disabled{opacity:.4;box-shadow:none}
+.chat{padding:14px;margin:14px 0;box-shadow:0 0 34px rgba(0,168,255,.16)}
+.chead{display:flex;justify-content:space-between;align-items:flex-start;position:relative}
+.picker{border:1px solid var(--line);background:rgba(61,224,255,.07);border-radius:4px;padding:8px 12px;font-size:14px;font-weight:600;color:var(--cy);margin-top:4px}
+.plist{position:absolute;top:62px;left:0;background:#07182a;border:1px solid var(--line);border-radius:6px;box-shadow:0 12px 30px rgba(0,0,0,.5),0 0 20px rgba(61,224,255,.15);z-index:4;min-width:260px;overflow:hidden;opacity:0;transform:translateY(-8px);pointer-events:none;transition:opacity .22s ease,transform .22s ease}
+.plist.open{opacity:1;transform:none;pointer-events:auto}
+.plist button{display:flex;justify-content:space-between;gap:12px;width:100%;padding:13px 14px;border:0;border-bottom:1px solid var(--line);background:transparent;font-size:15px;color:var(--ink);text-align:left}
+.plist button.on{background:rgba(61,224,255,.12);color:var(--cy)}
+.log{min-height:170px;max-height:52vh;overflow-y:auto;padding:12px 2px;display:flex;flex-direction:column;gap:10px;scroll-behavior:smooth}
 .empty{margin:auto;text-align:center;padding:20px 8px}
-.msg{max-width:92%;padding:10px 13px;border-radius:16px;line-height:1.5;font-size:15px;white-space:pre-wrap;word-wrap:break-word}
-.msg.user{align-self:flex-end;background:var(--dark);color:#fff;border-bottom-right-radius:4px}
-.msg.ai{align-self:flex-start;background:var(--sand);color:var(--ink);border-bottom-left-radius:4px}
-.msg.note{align-self:center;background:none;color:var(--muted);font-size:13px;text-align:center}
-.msg.note.bad{color:#9a3b2e}
+.msg{max-width:92%;padding:10px 13px;line-height:1.5;font-size:15px;white-space:pre-wrap;word-wrap:break-word}
+.msg.pop{animation:fadeUp .3s cubic-bezier(.2,.8,.2,1)}
+.msg.user{align-self:flex-end;background:rgba(0,168,255,.18);border:1px solid var(--line);color:#eaffff;border-radius:10px 10px 2px 10px}
+.msg.ai{align-self:flex-start;background:rgba(255,255,255,.04);border-left:2px solid var(--cy);color:var(--ink);border-radius:2px 10px 10px 10px}
+.msg.note{align-self:center;color:var(--muted);font-size:13px;text-align:center}
+.msg.bad{color:var(--bad)}
+.msg.pend:after{content:"";animation:dots 1.3s steps(1) infinite}
 .mrow{align-self:flex-start;display:flex;gap:8px;align-items:center;margin-top:-4px}
-.mini{border:1px solid var(--line);background:#fff;border-radius:10px;padding:5px 10px;font-size:12px;color:var(--dark)}
+.mini{border:1px solid var(--line);background:transparent;border-radius:4px;padding:5px 10px;font-size:12px;color:var(--cy)}
 .cnote{margin:4px 0 8px}
 .cnote p{margin:4px 0;font-size:13px}
-.inrow{display:flex;gap:8px;align-items:flex-end;border:1px solid var(--line);border-radius:18px;padding:8px;background:var(--bg)}
-.cin{flex:1;border:0;background:transparent;min-height:44px;max-height:140px;margin:0;padding:8px;resize:none;outline:none;border-radius:0}
-.send{width:44px;height:44px;border-radius:14px;border:0;background:var(--grad);color:#fff;font-size:20px;flex:none}
-.send:disabled{opacity:.4}
-#fab{position:fixed;right:16px;bottom:16px;width:58px;height:58px;border-radius:18px;background:var(--dark);color:#fff;font-size:24px;border:0}
-#menu{display:none;position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:5}
-#sheet{position:absolute;bottom:0;left:0;right:0;background:var(--bg);border-radius:20px 20px 0 0;padding:14px 16px 24px;max-height:80%;overflow:auto}
-#sheet button{display:block;width:100%;text-align:left;padding:14px 8px;border:0;border-bottom:1px solid var(--line);background:none;font-size:16px;color:var(--ink)}
-#sheet button.on{font-weight:700;color:var(--dark)}
+.inrow{display:flex;gap:8px;align-items:flex-end;border:1px solid var(--line);border-radius:6px;padding:8px;background:rgba(0,10,20,.6);transition:border-color .25s,box-shadow .25s}
+.inrow:focus-within{border-color:var(--cy);box-shadow:0 0 14px rgba(61,224,255,.22)}
+.cin{flex:1;width:auto;border:0;background:transparent;min-height:44px;max-height:140px;margin:0;padding:8px;resize:none;outline:none;box-shadow:none;border-radius:0}
+.cin:focus{box-shadow:none}
+.send{width:44px;height:44px;border-radius:4px;border:1px solid var(--cy);background:rgba(0,168,255,.3);color:#fff;font-size:20px;flex:none}
+.send:disabled{opacity:.35}
+#fab{position:fixed;right:16px;bottom:16px;width:58px;height:58px;border-radius:50%;background:rgba(3,10,18,.85);border:2px solid var(--cy);color:var(--cy);font-size:22px;box-shadow:0 0 20px rgba(61,224,255,.4)}
+#menu{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:5}
+#menu.open{display:block;animation:fadeIn .22s ease}
+#sheet{position:absolute;bottom:0;left:0;right:0;background:#061423;border-top:1px solid var(--cy);box-shadow:0 -10px 40px rgba(61,224,255,.18);border-radius:14px 14px 0 0;padding:14px 16px 24px;max-height:80%;overflow:auto;animation:sheetUp .3s cubic-bezier(.2,.8,.2,1)}
+#sheet button{display:block;width:100%;text-align:left;padding:14px 8px;border:0;border-bottom:1px solid rgba(61,224,255,.14);background:none;font-size:15px;color:var(--ink);letter-spacing:.04em}
+#sheet button.on{color:var(--cy);font-weight:700}
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes sheetUp{from{opacity:0;transform:translateY(40px)}to{opacity:1;transform:none}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes pulse{50%{opacity:.78;transform:scale(.93)}}
+@keyframes dots{0%{content:""}25%{content:"."}50%{content:".."}75%{content:"..."}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
 </style>
 </head>
 <body>
 <div class="top" id="topbar">
-  <div class="logo" onclick="show('Welcome')"><i>✦</i><span>Reddit<b>Pilot</b> AI</span></div>
-  <div class="pill">Reddit not connected</div>
+  <div class="logo" onclick="show('Welcome')"><i></i><span>Reddit<b>Pilot</b> AI</span></div>
+  <div class="pill">Reddit: not connected</div>
 </div>
 <main id="main"></main>
 <button id="fab" onclick="toggleMenu()">☰</button>
@@ -81,6 +112,7 @@ const AGENT_URL="https://redditpilot-agent.subsbooster123.workers.dev/";
 const pages=["Dashboard","AI Agent","Post Generator","Comment Generator","Subreddit Research","Content Discovery","Pending Content","Account Safety","Analytics","Activity History","Notifications","Settings"];
 const SUBS=["AppliedBiology","FemaleLifespan","HumanBiohacking","BiohackingForBeginner","PeptideBiotech"];
 const LIMIT=5800;
+const GEN="The user pressed the Generate post button. They have not given an idea. You choose one specific, original topic that fits this community and its saved rules. You cannot see the subreddit, so base the topic on its name and the saved rules, and prefer a topic that sparks real discussion. Do not repeat a topic already generated earlier in this chat. Do not copy any existing post. If the topic would need studies or numbers you cannot supply, pick a question or discussion style post instead of stating facts you cannot back up. Write the DRAFT as a line starting with TITLE: followed by a blank line and the post body. Mention any flair or format the saved rules require in RISKS. Reply in the required format.";
 let chat=[];
 let busy=false;
 
@@ -89,6 +121,8 @@ let curSub=getSub();
 function setSubStore(s){try{localStorage.setItem("rp_sub",s)}catch(e){}}
 function markOk(){try{localStorage.setItem("rp_ai_ok",new Date().toISOString())}catch(e){}}
 function getOk(){try{return localStorage.getItem("rp_ai_ok")}catch(e){return null}}
+function greeting(){const h=new Date().getHours();return h<12?"Good morning.":(h<18?"Good afternoon.":"Good evening.")}
+function modelLabel(m){return m&&m.indexOf("lite")>-1?"Flash Lite":"Flash"}
 
 function slug(p){return p.toLowerCase().replace(/ /g,"-")}
 function currentPage(){
@@ -123,16 +157,17 @@ function clearRules(sub){
   const d=loadRules();delete d[sub];storeRules(d);
   render(true);
 }
-function toggleMenu(){const m=document.getElementById("menu");m.style.display=m.style.display==="block"?"none":"block"}
+function toggleMenu(){document.getElementById("menu").classList.toggle("open")}
 
 /* ---------- chat ---------- */
 function chatHTML(){
-  return '<div class="chatwrap"><div class="chat">'+
-  '<div class="chead"><button class="picker" id="picker" onclick="togglePicker()"></button><div class="plist" id="plist"></div><button class="link" onclick="newChat()">New chat</button></div>'+
+  return '<div class="chat hud">'+
+  '<div class="chead"><div><div class="mono">Community</div><button class="picker" id="picker" onclick="togglePicker()"></button></div><div class="plist" id="plist"></div><button class="link" onclick="newChat()">New chat</button></div>'+
   '<div class="log" id="log"></div>'+
   '<div class="cnote" id="cnote"></div>'+
-  '<div class="inrow"><textarea class="cin" id="cin" rows="1" placeholder="Describe your idea..."></textarea><button class="send" id="send" onclick="sendMsg()">↑</button></div>'+
-  '</div></div>';
+  '<button class="gen" id="gen" onclick="generatePost()">Generate post</button>'+
+  '<div class="inrow"><textarea class="cin" id="cin" rows="1" placeholder="Optional: add a direction, or ask a follow-up"></textarea><button class="send" id="send" onclick="sendMsg()">↑</button></div>'+
+  '</div>';
 }
 function initChat(){updatePicker();drawLog();updateNote()}
 function updatePicker(){
@@ -145,15 +180,15 @@ function updatePicker(){
     if(s===curSub)b.className="on";
     const a=document.createElement("span");a.textContent="r/"+s;
     const c=document.createElement("span");c.textContent=rules[s]?"● rules saved":"○ no rules";
-    c.style.fontSize="12px";c.style.color="#6b7773";
+    c.style.fontSize="12px";c.style.color="#7fa6b8";
     b.appendChild(a);b.appendChild(c);
     b.onclick=function(){pickSub(s)};
     pl.appendChild(b);
   });
 }
-function togglePicker(){const pl=document.getElementById("plist");pl.style.display=pl.style.display==="block"?"none":"block"}
+function togglePicker(){document.getElementById("plist").classList.toggle("open")}
 function pickSub(s){
-  document.getElementById("plist").style.display="none";
+  document.getElementById("plist").classList.remove("open");
   if(s===curSub)return;
   curSub=s;setSubStore(s);
   if(chat.length){chat.push({role:"note",text:"Switched to r/"+s+". Earlier messages are not used for this community.",sub:s})}
@@ -162,53 +197,66 @@ function pickSub(s){
 function newChat(){chat=[];drawLog()}
 function drawLog(){
   const log=document.getElementById("log");
+  if(!log)return;
   log.innerHTML="";
   if(!chat.length){
-    log.innerHTML='<div class="empty"><div class="gtext" style="font-size:24px;font-weight:700">Ask RedditPilot</div><p>Pick a community above, then describe an idea. I check it against the rules you saved and tell you whether to post, comment, wait, or do nothing.</p></div>';
+    log.innerHTML='<div class="empty"><div class="gtext" style="font-family:var(--head);font-size:20px;font-weight:700;letter-spacing:.08em">ASK REDDITPILOT</div><p>Pick a community, then tap Generate post. I use the rules you saved for it, and I never post anything.</p></div>';
     return;
   }
   chat.forEach(function(m){
     const d=document.createElement("div");
-    d.className="msg "+m.role+(m.bad?" bad":"");
+    d.className="msg "+m.role+(m.bad?" bad":"")+(m.pending?" pend":"")+(m.shown?"":" pop");
     d.textContent=m.text;
     log.appendChild(d);
+    m.shown=true;
     if(m.role==="ai"&&!m.pending){
       const r=document.createElement("div");r.className="mrow";
       const t=document.createElement("span");t.className="tag";t.textContent="Not posted";
+      r.appendChild(t);
+      if(m.model){const mt=document.createElement("span");mt.className="tag info";mt.textContent=modelLabel(m.model);r.appendChild(mt)}
       const cb=document.createElement("button");cb.className="mini";cb.textContent="Copy";
       cb.onclick=function(){
         if(navigator.clipboard){navigator.clipboard.writeText(m.text).then(function(){cb.textContent="Copied"},function(){alert("Could not copy. Long-press the text to copy it.")})}
         else{alert("Could not copy. Long-press the text to copy it.")}
       };
-      r.appendChild(t);r.appendChild(cb);log.appendChild(r);
+      r.appendChild(cb);log.appendChild(r);
     }
   });
-  log.scrollTop=log.scrollHeight;
+  log.scrollTo({top:log.scrollHeight,behavior:"smooth"});
 }
 function updateNote(){
   const n=document.getElementById("cnote");
   const btn=document.getElementById("send");
-  if(!n||!btn)return;
+  const gen=document.getElementById("gen");
+  if(!n||!btn||!gen)return;
   const r=loadRules()[curSub];
-  if(r){n.innerHTML="";btn.disabled=busy}
+  if(r){n.innerHTML="";btn.disabled=busy;gen.disabled=busy}
   else{
     n.innerHTML='<span class="tag">No rules saved</span><p>Save the rules for r/'+curSub+' first, so the AI does not guess them.</p><button class="link" onclick="show(\'Subreddit Research\')">Go to Subreddit Research ›</button>';
-    btn.disabled=true;
+    btn.disabled=true;gen.disabled=true;
   }
 }
 function pre(sub){
   return "You are advising on a possible Reddit contribution for r/"+sub+".\nThe ONLY subreddit rules you know are the ones pasted below. Do not assume any other rules.\nIf the idea would break any saved rule, say so clearly and recommend WAIT or DO NOTHING.\nThis is a chat. If the message is a follow-up, use the earlier conversation, and still reply in the required format.\n\n";
 }
-async function sendMsg(){
-  if(busy)return;
+function sendMsg(){
   const inp=document.getElementById("cin");
   const topic=inp.value.trim();
+  if(!topic)return;
+  runAgent(topic,topic);
+}
+function generatePost(){
+  const extra=document.getElementById("cin").value.trim();
+  const text=GEN+(extra?"\nExtra direction from the user: "+extra:"");
+  runAgent(text,"Generate a post for r/"+curSub+(extra?" - "+extra:""));
+}
+async function runAgent(text,shown){
+  if(busy)return;
   const sub=curSub;
   const r=loadRules()[sub];
   if(!r){updateNote();return}
-  if(!topic)return;
   const head=pre(sub)+"SAVED RULES FOR r/"+sub+":\n"+r.text+"\n\n";
-  const tail="USER'S MESSAGE:\n"+topic;
+  const tail="USER'S MESSAGE:\n"+text;
   const base=head.length+tail.length;
   if(base>LIMIT){
     chat.push({role:"note",bad:true,text:"This is too long ("+base+" characters, the limit is "+LIMIT+"). Shorten your message or the saved rules for r/"+sub+".",sub:sub});
@@ -225,18 +273,18 @@ async function sendMsg(){
     hist=line+hist;room-=line.length;
   }
   const prompt=head+(hist?"EARLIER IN THIS CHAT:\n"+hist+"\n":"")+tail;
-  chat.push({role:"user",text:topic,sub:sub});
-  const pend={role:"ai",text:"Thinking...",sub:sub,pending:true};
+  chat.push({role:"user",text:shown,sub:sub});
+  const pend={role:"ai",text:"Processing",sub:sub,pending:true};
   chat.push(pend);
-  inp.value="";
+  document.getElementById("cin").value="";
   busy=true;updateNote();drawLog();
   try{
     const res=await fetch(AGENT_URL,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({prompt:prompt})});
     const data=await res.json();
     if(!res.ok||data.error){throw new Error(data.error||("Error "+res.status))}
-    pend.text=data.text;pend.pending=false;markOk();
+    pend.text=data.text;pend.model=data.model;pend.pending=false;pend.shown=false;markOk();
   }catch(e){
-    pend.role="note";pend.bad=true;pend.pending=false;
+    pend.role="note";pend.bad=true;pend.pending=false;pend.shown=false;
     pend.text="Something went wrong: "+e.message;
   }
   busy=false;
@@ -247,7 +295,7 @@ async function sendMsg(){
 function render(keepScroll){
   const name=currentPage();
   const home=name==="Welcome";
-  document.getElementById("menu").style.display="none";
+  document.getElementById("menu").classList.remove("open");
   document.getElementById("topbar").style.display=home?"none":"flex";
   document.getElementById("fab").style.display=home?"none":"block";
   const s=document.getElementById("sheet");
@@ -259,20 +307,20 @@ function render(keepScroll){
   let h="";
   if(name!=="Dashboard"&&!home){h+='<button class="back" onclick="goBack()">‹ Back</button>'}
   if(home){
-    h+='<div class="hero"><div class="mono">Your personal Reddit assistant</div><h1>Welcome to <span class="gtext">RedditPilot AI</span></h1><p>Research communities, check your ideas against their rules, and prepare thoughtful drafts. You stay in control of everything you post.</p><button class="cta" onclick="show(\'Dashboard\')">Get started</button><div class="foot">🔒 Nothing is ever posted or sent for you.</div></div>';
+    h+='<div class="hero"><div class="reactor"><span class="r1"></span><span class="r2"></span><span class="r3"></span><span class="r4"></span></div><div class="mono">'+greeting()+' Awaiting your command.</div><h1>Welcome to <span class="gtext">RedditPilot AI</span></h1><p>Research communities, check ideas against their rules, and prepare thoughtful drafts. You stay in control of everything you post.</p><button class="cta" onclick="show(\'Dashboard\')">Get started</button><div class="foot">🔒 Nothing is ever posted or sent for you.</div></div>';
   } else if(name==="Dashboard"){
-    h+='<div class="mono">Your Reddit workspace</div><h2 style="margin-top:6px">Ask <span class="gtext">RedditPilot</span></h2>';
+    h+='<div class="mono">Command center</div><h2 style="margin-top:6px">'+greeting()+' <span class="gtext">Ready.</span></h2>';
     h+=chatHTML();
-    h+='<div class="card sand"><div class="mono">Account safety</div><h3 style="margin-top:6px">Caution · Reddit isn\'t connected</h3><p>Account age, recent activity, moderation history and API limits are unavailable. Nothing has been checked.</p><button class="link" onclick="show(\'Account Safety\')">Review safety ↗</button></div>';
+    h+='<div class="card"><div class="mono">Account safety</div><h3 style="margin-top:6px">Caution · Reddit isn\'t connected</h3><p>Account age, recent activity, moderation history and API limits are unavailable. Nothing has been checked.</p><button class="link" onclick="show(\'Account Safety\')">Review safety ›</button></div>';
     const ok=getOk();
     const aiTag=ok?'<span class="tag ok">Working</span>':'<span class="tag">Not tested</span>';
-    const aiText=ok?'Last successful answer: '+new Date(ok).toLocaleString()+'.':'Set up on Cloudflare. Ask it something above to test it.';
-    h+='<div class="row" style="margin-top:24px"><h3 style="margin:0;font-weight:500;font-size:20px">Connection status</h3><span class="mono">Partly set up</span></div>';
+    const aiText=ok?'Last successful answer: '+new Date(ok).toLocaleString()+'.':'Set up on Cloudflare. Tap Generate post above to test it.';
+    h+='<div class="row" style="margin-top:24px"><h3 style="margin:0;font-family:var(--head);font-size:14px;letter-spacing:.08em">CONNECTION STATUS</h3><span class="mono">Partly set up</span></div>';
     h+='<div class="card"><div class="row"><h3>Reddit account</h3><span class="tag">Not connected</span></div><p>No authorized Reddit account connected.</p></div>';
     h+='<div class="card"><div class="row"><h3>AI agent</h3>'+aiTag+'</div><p>'+aiText+'</p></div>';
     h+='<div class="card"><div class="row"><h3>Telegram notifications</h3><span class="tag">Not connected</span></div><p>No Telegram integration connected.</p></div>';
     h+='<div class="card"><div class="row"><h3>Pending content</h3><span class="mono">No data</span></div><div style="text-align:center;padding:20px 0"><b>Nothing prepared yet</b><p>Drafts will appear here when you create them. Nothing is queued to post.</p></div></div>';
-    h+='<div class="card"><div class="row"><h3>Explore your workspace</h3><span class="mono">Workspace</span></div>';
+    h+='<div class="card"><div class="row"><h3>Explore</h3><span class="mono">Workspace</span></div>';
     h+='<div class="item" onclick="show(\'Subreddit Research\')"><b>Subreddit Research ›</b><p style="margin:2px 0 0">'+saved+' of '+SUBS.length+' communities have rules saved</p></div>';
     h+='<div class="item"><b>Post Generator</b><p style="margin:2px 0 0">Not available yet</p></div>';
     h+='<div class="item"><b>Activity History</b><p style="margin:2px 0 0">No data yet</p></div></div>';
@@ -304,7 +352,9 @@ function render(keepScroll){
   } else {
     h+='<h2>'+name+'</h2><div class="card"><span class="tag">Not built yet</span><p>This page will be added in a later step.</p></div>';
   }
-  document.getElementById("main").innerHTML=h;
+  const main=document.getElementById("main");
+  main.innerHTML=h;
+  if(!keepScroll){main.classList.remove("page");void main.offsetWidth;main.classList.add("page")}
   if(name==="Subreddit Research"){
     SUBS.forEach(sub=>{const t=document.getElementById("rules-"+sub);if(t&&d[sub])t.value=d[sub].text});
   }
