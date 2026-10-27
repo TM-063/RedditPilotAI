@@ -200,7 +200,9 @@ function removeSub(s){
   render(true);
 }
 
-function loadHist(){try{const a=JSON.parse(localStorage.getItem("rp_hist")||"[]");return Array.isArray(a)?a.filter(function(x){return x.type!=="generated"}).slice(0,10):[]}catch(e){return []}}
+function trimHist(a){const n={};return (Array.isArray(a)?a:[]).filter(function(x){if(!x||x.type!=="posted")return false;n[x.sub]=(n[x.sub]||0)+1;return n[x.sub]<=5})}
+function loadHist(){try{return trimHist(JSON.parse(localStorage.getItem("rp_hist")||"[]"))}catch(e){return []}}
+function saveHist(a){try{localStorage.setItem("rp_hist",JSON.stringify(trimHist(a)));return true}catch(e){return false}}
 function saveHist(a){try{localStorage.setItem("rp_hist",JSON.stringify(a.filter(function(x){return x.type!=="generated"}).slice(0,10)));return true}catch(e){return false}}
 function addHist(e){
   e.id=String(Date.now())+Math.floor(Math.random()*1000);
@@ -209,6 +211,28 @@ function addHist(e){
 }
 function delHist(id){saveHist(loadHist().filter(function(x){return x.id!==id}));render(true)}
 function clearHist(){if(!confirm("Clear the whole activity history on this phone?"))return;saveHist([]);render(true)}
+let openSub="";
+function toggleSub(s){openSub=(openSub===s?"":s);render(true)}
+function addCross(id,dest){
+  const h=loadHist();const e=h.find(function(x){return x.id===id});
+  if(!e)return false;
+  e.cross=e.cross||[];
+  if(!e.cross.some(function(c){return lower(c.sub)===lower(dest)}))e.cross.push({sub:dest,date:new Date().toISOString()});
+  saveHist(h);return true;
+}
+function crossFromHistory(id){
+  const sel=document.getElementById("xs-"+id);
+  const inp=document.getElementById("xi-"+id);
+  const typed=inp?inp.value.trim().replace(/^\/?r\//i,"").replace(/^\//,""):"";
+  const v=typed||(sel?sel.value:"");
+  const e=loadHist().find(function(x){return x.id===id});
+  if(!e)return;
+  if(!/^[A-Za-z0-9_]{3,21}$/.test(v)){alert("Pick a community from the list, or type a name with 3 to 21 letters, numbers or underscores.");return}
+  if(lower(v)===lower(e.sub)){alert("That is the community you originally posted in.");return}
+  if(!confirm("Record that you crossposted this to r/"+v+"? Only do this if you really did it on Reddit."))return;
+  addCross(id,v);
+  render(true);
+}
 function markOk(){try{localStorage.setItem("rp_ai_ok",new Date().toISOString())}catch(e){}}
 function getOk(){try{return localStorage.getItem("rp_ai_ok")}catch(e){return null}}
 function greeting(){const h=new Date().getHours();const g=THEMES[getTheme()].greet;return h<12?g[0]:(h<18?g[1]:g[2])}
@@ -306,11 +330,13 @@ function addSection(wrap,label,text,copy){
   const t=document.createElement("div");t.className="sectext";t.textContent=text;
   s.appendChild(h);s.appendChild(t);wrap.appendChild(s);
 }
-function markPosted(m,sub,kind){
-  const cross=kind==="cross";
-  if(!confirm((cross?"Record that you crossposted this to r/":"Record that you posted this in r/")+sub+"? Only do this if you really did it on Reddit."))return;
-  addHist({type:cross?"cross":"posted",sub:sub,from:m.sub,title:m.parsed.title});
-  if(cross){m.crossed=(m.crossed||[]);m.crossed.push(sub)}else{m.posted=(m.posted||[]);m.posted.push(sub)}
+function markCross(m,dest,sug){
+  if(!confirm("Record that you posted this in r/"+m.sub+" and crossposted it to r/"+dest+"? Only do this if you really did it on Reddit."))return;
+  if(!(m.hid&&addCross(m.hid,dest))){
+    const e={type:"posted",sub:m.sub,title:m.parsed.title,sug:sug.slice(0,8),cross:[{sub:dest,date:new Date().toISOString()}]};
+    addHist(e);m.hid=e.id;
+  }
+  m.crossed=(m.crossed||[]);if(m.crossed.indexOf(dest)<0)m.crossed.push(dest);
   drawLog();
 }
 
@@ -325,21 +351,18 @@ function resultBlock(m){
   if(lower(p.body.replace(/[.\s]+$/,""))!=="none")addSection(wrap,"Body",p.body,true);
   addSection(wrap,"Where it could also be shared",p.repost,false);
   const f=document.createElement("div");f.className="mrow";
-  const t=document.createElement("span");t.className="tag";t.textContent="Not posted";f.appendChild(t);
+  const t=document.createElement("span");t.className=m.hid?"tag ok":"tag";t.textContent=m.hid?"Posted in r/"+m.sub:"Not posted";f.appendChild(t);
   if(m.model){const mt=document.createElement("span");mt.className="tag info";mt.textContent=modelLabel(m.model);f.appendChild(mt)}
-  (m.posted||[]).forEach(function(s){const pt=document.createElement("span");pt.className="tag ok";pt.textContent="Posted: r/"+s;f.appendChild(pt)});
 (m.crossed||[]).forEach(function(s){const pt=document.createElement("span");pt.className="tag ok";pt.textContent="Crossposted: r/"+s;f.appendChild(pt)});
   if(lower(p.title)!=="none"){
-    const pb=document.createElement("button");pb.className="mini";pb.textContent="Mark as posted in r/"+m.sub;
-pb.onclick=function(){markPosted(m,m.sub,"main")};
-f.appendChild(pb);
+    
 const sug=[];
 (p.repost.match(/r\/[A-Za-z0-9_]{3,21}/g)||[]).forEach(function(x){const n=x.slice(2);if(lower(n)!==lower(m.sub)&&!sug.map(lower).includes(lower(n)))sug.push(n)});
 if(sug.length){
   const sel=document.createElement("select");sel.className="mini";
   sug.forEach(function(s){const o=document.createElement("option");o.value=s;o.textContent="r/"+s;sel.appendChild(o)});
   const cb=document.createElement("button");cb.className="mini";cb.textContent="Mark crossposted";
-  cb.onclick=function(){markPosted(m,sel.value,"cross")};
+  cb.onclick=function(){markCross(m,sel.value,sug)};
   f.appendChild(sel);f.appendChild(cb);
 }
   }
@@ -524,16 +547,25 @@ function render(keepScroll){
     }
     h+='</div>';
     h+='<div class="card"><div class="mono">Last posted per community</div>';
-    subs.forEach(function(sub){
-      const lp=posted.find(function(x){return x.sub===sub});
-      h+='<div class="item"><b>r/'+esc(sub)+'</b><p style="margin:2px 0 0">'+(lp?esc(new Date(lp.date).toLocaleDateString()):'Nothing recorded')+'</p></div>';
+        subs.forEach(function(sub){
+      const mine=posted.filter(function(x){return x.sub===sub});
+      const open=(openSub===sub);
+      h+='<div class="item"><div class="row" style="cursor:pointer" onclick="toggleSub(\''+esc(sub)+'\')"><div><b>r/'+esc(sub)+'</b><p style="margin:2px 0 0">'+(mine.length?esc(new Date(mine[0].date).toLocaleDateString()):'Nothing recorded')+'</p></div><span class="mono">'+(open?'▾':'▸')+'</span></div>';
+      if(open){
+        if(!mine.length){h+='<p>No posts recorded here yet. A post appears after you tap Mark crossposted under a generated post.</p>'}
+        mine.forEach(function(x){
+          const done=(x.cross||[]).map(function(c){return c.sub});
+          const left=(x.sug||[]).filter(function(s){return done.map(lower).indexOf(lower(s))===-1});
+          h+='<div class="item"><b>'+esc(x.title||"")+'</b><p>Posted in r/'+esc(sub)+' on '+esc(new Date(x.date).toLocaleDateString())+'</p>';
+          if(done.length){h+='<p>Crossposted to: '+done.map(function(s){return 'r/'+esc(s)}).join(", ")+'</p>'}
+          if(left.length){h+='<select class="mini" id="xs-'+esc(x.id)+'">'+left.map(function(s){return '<option value="'+esc(s)+'">r/'+esc(s)+'</option>'}).join("")+'</select>'}
+          h+='<input type="text" id="xi-'+esc(x.id)+'" placeholder="Or type another community" autocapitalize="off" autocomplete="off">';
+          h+='<div><button class="btn" onclick="crossFromHistory(\''+esc(x.id)+'\')">Mark crossposted</button><button class="btn alt" onclick="delHist(\''+esc(x.id)+'\')">Delete record</button></div></div>';
+        });
+      }
+      h+='</div>';
     });
     h+='</div>';
-    h+='<div class="row" style="margin-top:20px"><div class="mono">All activity</div>'+(hist.length?'<button class="link" onclick="clearHist()">Clear all</button>':'')+'</div>';
-    if(!hist.length){h+='<div class="card"><p>Nothing yet. Generated posts and posts you mark as posted will appear here.</p></div>'}
-    hist.forEach(function(x){
-      h+='<div class="card"><div class="row"><h3>r/'+esc(x.sub)+'</h3><span class="tag '+(x.type==="cross"?'info':'ok')+'">'+(x.type==="cross"?'Crossposted':'Posted')+'</span></div><p>'+esc(x.title||"")+'</p><p>'+esc(new Date(x.date).toLocaleString())+'</p><button class="link" onclick="delHist(\''+esc(x.id)+'\')">Delete entry</button></div>';
-    });
   } else if(name==="Settings"){
     h+='<h2>Settings</h2><div class="card"><h3>Persona</h3><p>Pick the look of the app. It is saved on this phone.</p><div class="themes">'+themeButtons()+'</div></div>';
     h+='<div class="card"><h3>Stored on this phone</h3><p>Your saved rules, added subreddits, history and persona live in this browser only. Clearing browser data removes them.</p></div>';
