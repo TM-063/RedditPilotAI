@@ -316,7 +316,7 @@ function resultBlock(m){
   wrap.className="result"+(m.shown?"":" pop");
   m.shown=true;
   if(p.notes){const n=document.createElement("p");n.className="notes";n.textContent=p.notes;wrap.appendChild(n)}
-  if(p.comment){const pc=document.createElement("div");pc.className="persona";const pcn=document.createElement("div");pcn.className="mono";pcn.textContent=THEMES[getTheme()].name;const pct=document.createElement("div");pct.textContent=p.comment;pc.appendChild(pcn);pc.appendChild(pct);wrap.appendChild(pc)}
+  if(p.comment){const pc=document.createElement("div");pc.className="persona";const pcn=document.createElement("div");pcn.textContent=THEMES[m.persona||getTheme()].name;const pct=document.createElement("div");pct.textContent=p.comment;pc.appendChild(pcn);pc.appendChild(pct);wrap.appendChild(pc)}
   addSection(wrap,"Title",p.title,true);
   if(lower(p.body.replace(/[.\s]+$/,""))!=="none")addSection(wrap,"Body",p.body,true);
   addSection(wrap,"Where it could also be shared",p.repost,false);
@@ -423,7 +423,7 @@ async function generatePost(){
   }
   const prompt=base+others+"\nGenerate now.";
   chat.push({role:"user",text:"Generate a post for r/"+sub+(extra?" - "+extra:""),sub:sub});
-  const pend={role:"ai",text:"Processing",sub:sub,pending:true};
+  const pend={role:"ai",text:"Processing",sub:sub,pending:true,persona:getTheme()};
   chat.push(pend);
   document.getElementById("cin").value="";
   busy=true;updateNote();drawLog();
