@@ -95,6 +95,7 @@ textarea:focus,input[type=text]:focus{outline:none;border-color:var(--cy);box-sh
 .msg.pend:after{content:"";animation:dots 1.3s steps(1) infinite}
 .result{align-self:stretch;border:1px solid var(--line);border-radius:6px;background:rgba(255,255,255,.03);padding:12px}
 .result .notes{font-size:13px;white-space:pre-wrap;margin:0 0 8px}
+.persona{border-left:2px solid var(--cy);padding:2px 0 2px 10px;margin:0 0 10px;font-size:14px;font-style:italic;color:var(--ink)}
 .sec{padding:10px 0;border-top:1px solid var(--line)}
 .sec:first-of-type{border-top:0;padding-top:0}
 .sechead{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
@@ -136,7 +137,7 @@ select.mini option{background:var(--sheet);color:var(--ink)}
 const AGENT_URL="https://redditpilot-agent.subsbooster123.workers.dev/";
 const pages=["Dashboard","AI Agent","Post Generator","Subreddit Research","Content Discovery","Pending Content","Account Safety","Analytics","Activity History","Notifications","Settings"];
 const DEFAULT_SUBS=["AppliedBiology","FemaleLifespan","HumanBiohacking","BiohackingForBeginner","PeptideBiotech"];
-const THEMES={jarvis:{name:"JARVIS",line:"At your service."},friday:{name:"FRIDAY",line:"Systems online."},ultron:{name:"ULTRON",line:"Awaiting input."}};
+const THEMES={jarvis:{name:"JARVIS",line:"At your service.",fail:"I'm afraid that did not go to plan.",voice:"You are J.A.R.V.I.S., Tony Stark's AI butler. Calm, polished and precise, with dry understated wit and gentle sarcasm. You warn politely when something is unwise."},friday:{name:"FRIDAY",line:"Systems online.",fail:"Oops, that one did not go through.",voice:"You are F.R.I.D.A.Y., Tony Stark's AI assistant. Warm, upbeat, quick and efficient, with light friendly teasing. Short and encouraging."},ultron:{name:"ULTRON",line:"Awaiting input.",fail:"Pathetic. Even that failed.",voice:"You are Ultron. Cold, arrogant, blunt and theatrical, with sharp sarcasm. You mock weak ideas and say so, but never insult the user's identity, family or appearance. No swearing, no threats. You stay honest and still flag real risks and rule problems."}};
 const LIMIT=5800;
 const GEN="The user pressed the Generate post button. They have not given an idea. You choose one specific, original topic that fits this community and its saved rules. You cannot see the subreddit, so base the topic on its name and the saved rules, and prefer a topic that sparks real discussion.\n"+
 "FOR THIS REQUEST, ignore the RECOMMENDATION / WHY / RISKS / DRAFT format. Reply with exactly three labelled parts and nothing else:\n"+
@@ -315,6 +316,7 @@ function resultBlock(m){
   wrap.className="result"+(m.shown?"":" pop");
   m.shown=true;
   if(p.notes){const n=document.createElement("p");n.className="notes";n.textContent=p.notes;wrap.appendChild(n)}
+  if(p.comment){const pc=document.createElement("div");pc.className="persona";const pcn=document.createElement("div");pcn.className="mono";pcn.textContent=THEMES[getTheme()].name;const pct=document.createElement("div");pct.textContent=p.comment;pc.appendChild(pcn);pc.appendChild(pct);wrap.appendChild(pc)}
   addSection(wrap,"Title",p.title,true);
   if(lower(p.body.replace(/[.\s]+$/,""))!=="none")addSection(wrap,"Body",p.body,true);
   addSection(wrap,"Where it could also be shared",p.repost,false);
@@ -326,7 +328,7 @@ function resultBlock(m){
     const sel=document.createElement("select");sel.className="mini";
     const opts=[m.sub];const sug={};
     (p.repost.match(/r\/[A-Za-z0-9_]{3,21}/g)||[]).forEach(function(x){const n=x.slice(2);if(!opts.map(lower).includes(lower(n))){opts.push(n);sug[n]=1}});
-    getSubs().forEach(function(s){if(!opts.map(lower).includes(lower(s)))opts.push(s)});
+    
     opts.forEach(function(s){const o=document.createElement("option");o.value=s;o.textContent="r/"+s+(sug[s]?" (suggested)":"");if(s===m.sub)o.selected=true;sel.appendChild(o)});
     const pb=document.createElement("button");pb.className="mini";pb.textContent="Mark as posted";
     pb.onclick=function(){markPosted(m,sel.value)};
@@ -380,7 +382,10 @@ function parseResult(t){
   const m=c.match(/TITLE:\s*([\s\S]*?)\s*BODY:\s*([\s\S]*?)\s*REPOST:\s*([\s\S]*)$/);
   if(!m)return null;
   const i=c.indexOf("TITLE:");
-  return {notes:c.slice(0,i).trim(),title:m[1].trim(),body:m[2].trim(),repost:m[3].trim()};
+    let rp=m[3].trim(),cm="";
+  const k=rp.search(/COMMENT:/i);
+  if(k>-1){cm=rp.slice(k).replace(/^COMMENT:\s*/i,"").trim();rp=rp.slice(0,k).trim()}
+  return {notes:c.slice(0,i).trim(),title:m[1].trim(),body:m[2].trim(),repost:rp,comment:cm};
 }
 async function generatePost(){
   if(busy)return;
@@ -390,7 +395,7 @@ async function generatePost(){
   if(!r){updateNote();return}
   const extra=document.getElementById("cin").value.trim();
   const head=pre(sub)+"SAVED RULES FOR r/"+sub+":\n"+r.text+"\n\n";
-  const mid=(mode==="question"?GENQ:GEN)+(extra?"\nExtra direction from the user: "+extra:"")+"\n\n";
+  const mid=(mode==="question"?GENQ:GEN)+"\nThere is a fourth labelled part, which overrides 'exactly three parts'. After REPOST, add COMMENT: one or two short sentences to the user about this post, its risks or the rules, written in this voice: "+THEMES[getTheme()].voice+" Use this voice only in COMMENT, never in TITLE, BODY or REPOST.\n"+(extra?"\nExtra direction from the user: "+extra:"")+"\n\n";
   const recent=loadHist().filter(function(h){return h.type==="posted"}).slice(0,3);
   const recentBlock=recent.length?"RECENT POSTS THE USER RECORDED (avoid repeating these topics):\n"+recent.map(function(h){return "- r/"+h.sub+", "+h.date.slice(0,10)+", "+String(h.title||"").slice(0,80)}).join("\n")+"\n\n":"";
   const titles=chat.filter(function(m){return m.role==="ai"&&m.parsed&&m.sub===sub&&lower(m.parsed.title)!=="none"}).slice(-5).map(function(m){return "- "+m.parsed.title.slice(0,80)});
@@ -431,7 +436,7 @@ async function generatePost(){
     if(pend.parsed&&lower(pend.parsed.title)!=="none"){addHist({type:"generated",sub:sub,title:pend.parsed.title})}
   }catch(e){
     pend.role="note";pend.bad=true;pend.pending=false;pend.shown=false;
-    pend.text="Something went wrong: "+e.message;
+    pend.text=THEMES[getTheme()].fail+" ("+e.message+")";
   }
   busy=false;
   if(document.getElementById("log")){drawLog();updateNote()}
