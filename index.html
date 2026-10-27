@@ -203,7 +203,6 @@ function removeSub(s){
 function trimHist(a){const n={};return (Array.isArray(a)?a:[]).filter(function(x){if(!x||x.type!=="posted")return false;n[x.sub]=(n[x.sub]||0)+1;return n[x.sub]<=5})}
 function loadHist(){try{return trimHist(JSON.parse(localStorage.getItem("rp_hist")||"[]"))}catch(e){return []}}
 function saveHist(a){try{localStorage.setItem("rp_hist",JSON.stringify(trimHist(a)));return true}catch(e){return false}}
-function saveHist(a){try{localStorage.setItem("rp_hist",JSON.stringify(a.filter(function(x){return x.type!=="generated"}).slice(0,10)));return true}catch(e){return false}}
 function addHist(e){
   e.id=String(Date.now())+Math.floor(Math.random()*1000);
   e.date=new Date().toISOString();
