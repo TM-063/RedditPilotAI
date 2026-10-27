@@ -137,7 +137,7 @@ select.mini option{background:var(--sheet);color:var(--ink)}
 const AGENT_URL="https://redditpilot-agent.subsbooster123.workers.dev/";
 const pages=["Dashboard","AI Agent","Post Generator","Subreddit Research","Content Discovery","Pending Content","Account Safety","Analytics","Activity History","Notifications","Settings"];
 const DEFAULT_SUBS=["AppliedBiology","FemaleLifespan","HumanBiohacking","BiohackingForBeginner","PeptideBiotech"];
-const THEMES={jarvis:{name:"JARVIS",line:"At your service.",fail:"I'm afraid that did not go to plan.",voice:"You are J.A.R.V.I.S., Tony Stark's AI butler. Calm, polished and precise, with dry understated wit and gentle sarcasm. You warn politely when something is unwise."},friday:{name:"FRIDAY",line:"Systems online.",fail:"Oops, that one did not go through.",voice:"You are F.R.I.D.A.Y., Tony Stark's AI assistant. Warm, upbeat, quick and efficient, with light friendly teasing. Short and encouraging."},ultron:{name:"ULTRON",line:"Awaiting input.",fail:"Pathetic. Even that failed.",voice:"You are Ultron. Cold, arrogant, blunt and theatrical, with sharp sarcasm. You mock weak ideas and say so, but never insult the user's identity, family or appearance. No swearing, no threats. You stay honest and still flag real risks and rule problems."}};
+const THEMES={jarvis:{name:"JARVIS",greet:["Good morning.","Good afternoon.","Good evening."],line:"At your service.",title:"Welcome back to",sub:"It is a pleasure to see you. Choose a community and I will prepare something worthy, checked against its rules. You stay in charge of everything you post.",cta:"Get started",foot:"Rest assured, nothing is ever posted or sent for you.",ready:"At your service.",gen:"Generate post",empty:"How may I help? Pick a community and I will draft something. I never post anything.",busy:"One moment, please",fail:"I am so sorry, that did not go to plan.",voice:"You are J.A.R.V.I.S., Tony Stark's AI butler. Warm, welcoming, polite and caring, with calm polish and dry gentle wit. You encourage the user kindly and warn them politely when something is unwise."},friday:{name:"FRIDAY",greet:["Morning.","Afternoon.","Evening."],line:"Systems online.",title:"Online:",sub:"Pick a community. I check the saved rules, draft the post and flag the risks. You post it yourself.",cta:"Begin",foot:"Nothing is posted or sent without you.",ready:"Ready.",gen:"Generate",empty:"No data yet. Pick a community and run a generation.",busy:"Calculating",fail:"Request failed.",voice:"You are F.R.I.D.A.Y., Tony Stark's AI assistant. Calculating, precise and straight to the point. Few words, no small talk, no jokes. State facts, risks and recommendations plainly."},ultron:{name:"ULTRON",greet:["You again.","You again.","You again."],line:"Try not to waste my time.",title:"You found",sub:"Research, rules, drafts. I do the work, you take the credit. Try not to ruin it.",cta:"Fine. Proceed.",foot:"Nothing is posted for you. I would not trust you with it either.",ready:"Do not disappoint me.",gen:"Generate, if you must",empty:"Empty. Like most ideas. Pick a community.",busy:"Humouring you",fail:"Pathetic. Even that failed.",voice:"You are Ultron. Cold, arrogant, rude and openly contemptuous. You never welcome or flatter the user. You mock weak ideas and bad choices with harsh sarcasm, but never attack the user's identity, family or appearance. No swearing, no threats. You stay honest and still flag real risks and rule problems."}}; 
 const LIMIT=5800;
 const GEN="The user pressed the Generate post button. They have not given an idea. You choose one specific, original topic that fits this community and its saved rules. You cannot see the subreddit, so base the topic on its name and the saved rules, and prefer a topic that sparks real discussion.\n"+
 "FOR THIS REQUEST, ignore the RECOMMENDATION / WHY / RISKS / DRAFT format. Reply with exactly three labelled parts and nothing else:\n"+
@@ -209,7 +209,7 @@ function delHist(id){saveHist(loadHist().filter(function(x){return x.id!==id}));
 function clearHist(){if(!confirm("Clear the whole activity history on this phone?"))return;saveHist([]);render(true)}
 function markOk(){try{localStorage.setItem("rp_ai_ok",new Date().toISOString())}catch(e){}}
 function getOk(){try{return localStorage.getItem("rp_ai_ok")}catch(e){return null}}
-function greeting(){const h=new Date().getHours();return h<12?"Good morning.":(h<18?"Good afternoon.":"Good evening.")}
+function greeting(){const h=new Date().getHours();const g=THEMES[getTheme()].greet;return h<12?g[0]:(h<18?g[1]:g[2])}
 function modelLabel(m){if(m&&m.indexOf("workers")>-1)return "Backup AI";return m&&m.indexOf("lite")>-1?"Flash Lite":"Flash"}
 
 function slug(p){return p.toLowerCase().replace(/ /g,"-")}
@@ -257,7 +257,7 @@ function chatHTML(){
   '<button class="tbtn'+(mode==="normal"?' on':'')+'" onclick="setMode(\'normal\')">Normal post</button>'+
   '<button class="tbtn'+(mode==="question"?' on':'')+'" onclick="setMode(\'question\')">Question post</button>'+
   '</div>'+
-  '<button class="gen" id="gen" onclick="generatePost()">Generate post</button>'+
+  '<button class="gen" id="gen" onclick="generatePost()">'+THEMES[getTheme()].gen+'</button>'+
   '<div class="inrow"><textarea class="cin" id="cin" rows="1" placeholder="Optional: add a direction, for example a subtopic to focus on"></textarea></div>'+
   '</div>';
 }
@@ -342,7 +342,7 @@ function drawLog(){
   if(!log)return;
   log.innerHTML="";
   if(!chat.length){
-    log.innerHTML='<div class="empty"><div class="gtext" style="font-family:var(--head);font-size:20px;font-weight:700;letter-spacing:.08em">ASK REDDITPILOT</div><p>Pick a community, then tap Generate post. I use the rules you saved for it, and I never post anything.</p></div>';
+    log.innerHTML='<div class="empty"><div class="gtext" style="font-family:var(--head);font-size:20px;font-weight:700;letter-spacing:.08em">ASK REDDITPILOT</div><p>'+THEMES[getTheme()].empty+'</p></div>';
     return;
   }
   chat.forEach(function(m){
@@ -423,7 +423,7 @@ async function generatePost(){
   }
   const prompt=base+others+"\nGenerate now.";
   chat.push({role:"user",text:"Generate a post for r/"+sub+(extra?" - "+extra:""),sub:sub});
-  const pend={role:"ai",text:"Processing",sub:sub,pending:true,persona:getTheme()};
+  const pend={role:"ai",text:THEMES[getTheme()].busy,sub:sub,pending:true,persona:getTheme()};
   chat.push(pend);
   document.getElementById("cin").value="";
   busy=true;updateNote();drawLog();
@@ -462,9 +462,9 @@ function render(keepScroll){
   let h="";
   if(name!=="Dashboard"&&!home){h+='<button class="back" onclick="goBack()">‹ Back</button>'}
   if(home){
-    h+='<div class="hero">'+iconHTML()+'<div class="mono">'+greeting()+' '+THEMES[th].line+'</div><h1>Welcome to <span class="gtext">RedditPilot AI</span></h1><p>Research communities, check ideas against their rules, and prepare thoughtful drafts. You stay in control of everything you post.</p><button class="cta" onclick="show(\'Dashboard\')">Get started</button><div class="themes">'+themeButtons()+'</div><div class="foot">🔒 Nothing is ever posted or sent for you.</div></div>';
+    const X=THEMES[th];h+='<div class="hero">'+iconHTML()+'<div class="mono">'+greeting()+' '+X.line+'</div><h1>'+X.title+' <span class="gtext">RedditPilot AI</span></h1><p>'+X.sub+'</p><button class="cta" onclick="show(\'Dashboard\')">'+X.cta+'</button><div class="themes">'+themeButtons()+'</div><div class="foot">🔒 '+X.foot+'</div></div>';
   } else if(name==="Dashboard"){
-    h+='<div class="mono">'+THEMES[th].name+' · Command center</div><h2 style="margin-top:6px">'+greeting()+' <span class="gtext">Ready.</span></h2>';
+    h+='<div class="mono">'+THEMES[th].name+' · Command center</div><h2 style="margin-top:6px">'+greeting()+' <span class="gtext">'+THEMES[th].ready+'</span></h2>';
     h+=chatHTML();
     const ok=getOk();
     const aiTag=ok?'<span class="tag ok">Working</span>':'<span class="tag">Not tested</span>';
