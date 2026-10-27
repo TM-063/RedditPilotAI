@@ -200,8 +200,8 @@ function removeSub(s){
   render(true);
 }
 
-function loadHist(){try{const a=JSON.parse(localStorage.getItem("rp_hist")||"[]");return Array.isArray(a)?a:[]}catch(e){return []}}
-function saveHist(a){try{localStorage.setItem("rp_hist",JSON.stringify(a.slice(0,200)));return true}catch(e){return false}}
+function loadHist(){try{const a=JSON.parse(localStorage.getItem("rp_hist")||"[]");return Array.isArray(a)?a.filter(function(x){return x.type!=="generated"}).slice(0,10):[]}catch(e){return []}}
+function saveHist(a){try{localStorage.setItem("rp_hist",JSON.stringify(a.filter(function(x){return x.type!=="generated"}).slice(0,10)));return true}catch(e){return false}}
 function addHist(e){
   e.id=String(Date.now())+Math.floor(Math.random()*1000);
   e.date=new Date().toISOString();
@@ -306,12 +306,14 @@ function addSection(wrap,label,text,copy){
   const t=document.createElement("div");t.className="sectext";t.textContent=text;
   s.appendChild(h);s.appendChild(t);wrap.appendChild(s);
 }
-function markPosted(m,sub){
-  if(!confirm("Record that you posted this in r/"+sub+"? Only do this if you really posted it on Reddit."))return;
-  addHist({type:"posted",sub:sub,title:m.parsed.title});
-  m.posted=(m.posted||[]);m.posted.push(sub);
+function markPosted(m,sub,kind){
+  const cross=kind==="cross";
+  if(!confirm((cross?"Record that you crossposted this to r/":"Record that you posted this in r/")+sub+"? Only do this if you really did it on Reddit."))return;
+  addHist({type:cross?"cross":"posted",sub:sub,from:m.sub,title:m.parsed.title});
+  if(cross){m.crossed=(m.crossed||[]);m.crossed.push(sub)}else{m.posted=(m.posted||[]);m.posted.push(sub)}
   drawLog();
 }
+
 function resultBlock(m){
   const p=m.parsed;
   const wrap=document.createElement("div");
@@ -325,16 +327,21 @@ function resultBlock(m){
   const f=document.createElement("div");f.className="mrow";
   const t=document.createElement("span");t.className="tag";t.textContent="Not posted";f.appendChild(t);
   if(m.model){const mt=document.createElement("span");mt.className="tag info";mt.textContent=modelLabel(m.model);f.appendChild(mt)}
-  (m.posted||[]).forEach(function(s){const pt=document.createElement("span");pt.className="tag ok";pt.textContent="Recorded: r/"+s;f.appendChild(pt)});
+  (m.posted||[]).forEach(function(s){const pt=document.createElement("span");pt.className="tag ok";pt.textContent="Posted: r/"+s;f.appendChild(pt)});
+(m.crossed||[]).forEach(function(s){const pt=document.createElement("span");pt.className="tag ok";pt.textContent="Crossposted: r/"+s;f.appendChild(pt)});
   if(lower(p.title)!=="none"){
-    const sel=document.createElement("select");sel.className="mini";
-    const opts=[m.sub];const sug={};
-    (p.repost.match(/r\/[A-Za-z0-9_]{3,21}/g)||[]).forEach(function(x){const n=x.slice(2);if(!opts.map(lower).includes(lower(n))){opts.push(n);sug[n]=1}});
-    
-    opts.forEach(function(s){const o=document.createElement("option");o.value=s;o.textContent="r/"+s+(sug[s]?" (suggested)":"");if(s===m.sub)o.selected=true;sel.appendChild(o)});
-    const pb=document.createElement("button");pb.className="mini";pb.textContent="Mark as posted";
-    pb.onclick=function(){markPosted(m,sel.value)};
-    f.appendChild(sel);f.appendChild(pb);
+    const pb=document.createElement("button");pb.className="mini";pb.textContent="Mark as posted in r/"+m.sub;
+pb.onclick=function(){markPosted(m,m.sub,"main")};
+f.appendChild(pb);
+const sug=[];
+(p.repost.match(/r\/[A-Za-z0-9_]{3,21}/g)||[]).forEach(function(x){const n=x.slice(2);if(lower(n)!==lower(m.sub)&&!sug.map(lower).includes(lower(n)))sug.push(n)});
+if(sug.length){
+  const sel=document.createElement("select");sel.className="mini";
+  sug.forEach(function(s){const o=document.createElement("option");o.value=s;o.textContent="r/"+s;sel.appendChild(o)});
+  const cb=document.createElement("button");cb.className="mini";cb.textContent="Mark crossposted";
+  cb.onclick=function(){markPosted(m,sel.value,"cross")};
+  f.appendChild(sel);f.appendChild(cb);
+}
   }
   wrap.appendChild(f);
   return wrap;
@@ -435,7 +442,6 @@ async function generatePost(){
     if(!res.ok||data.error){throw new Error(data.error||("Error "+res.status))}
     pend.text=data.text;pend.model=data.source;pend.pending=false;pend.shown=false;markOk();
     pend.parsed=parseResult(data.text);
-    if(pend.parsed&&lower(pend.parsed.title)!=="none"){addHist({type:"generated",sub:sub,title:pend.parsed.title})}
   }catch(e){
     pend.role="note";pend.bad=true;pend.pending=false;pend.shown=false;
     pend.text=THEMES[getTheme()].fail+" ("+e.message+")";
@@ -526,7 +532,7 @@ function render(keepScroll){
     h+='<div class="row" style="margin-top:20px"><div class="mono">All activity</div>'+(hist.length?'<button class="link" onclick="clearHist()">Clear all</button>':'')+'</div>';
     if(!hist.length){h+='<div class="card"><p>Nothing yet. Generated posts and posts you mark as posted will appear here.</p></div>'}
     hist.forEach(function(x){
-      h+='<div class="card"><div class="row"><h3>r/'+esc(x.sub)+'</h3><span class="tag '+(x.type==="posted"?'ok':'info')+'">'+(x.type==="posted"?'Posted (recorded by you)':'Generated')+'</span></div><p>'+esc(x.title||"")+'</p><p>'+esc(new Date(x.date).toLocaleString())+'</p><button class="link" onclick="delHist(\''+esc(x.id)+'\')">Delete entry</button></div>';
+      h+='<div class="card"><div class="row"><h3>r/'+esc(x.sub)+'</h3><span class="tag '+(x.type==="cross"?'info':'ok')+'">'+(x.type==="cross"?'Crossposted':'Posted')+'</span></div><p>'+esc(x.title||"")+'</p><p>'+esc(new Date(x.date).toLocaleString())+'</p><button class="link" onclick="delHist(\''+esc(x.id)+'\')">Delete entry</button></div>';
     });
   } else if(name==="Settings"){
     h+='<h2>Settings</h2><div class="card"><h3>Persona</h3><p>Pick the look of the app. It is saved on this phone.</p><div class="themes">'+themeButtons()+'</div></div>';
