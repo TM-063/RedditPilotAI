@@ -141,8 +141,8 @@ const LIMIT=5800;
 const GEN="The user pressed the Generate post button. They have not given an idea. You choose one specific, original topic that fits this community and its saved rules. You cannot see the subreddit, so base the topic on its name and the saved rules, and prefer a topic that sparks real discussion.\n"+
 "FOR THIS REQUEST, ignore the RECOMMENDATION / WHY / RISKS / DRAFT format. Reply with exactly three labelled parts and nothing else:\n"+
 "TITLE: one post title.\n"+
-"BODY: the full post text, following the writing rules. If the saved rules require a flair or format, end the body with one line starting with 'Flair or format note:'.\n"+
-"REPOST: up to 3 other communities from the list given below where this post could also be shared under their saved rules. For each one, write one line: the community name, why it fits, and what to change (title, flair or format). If none fit or their rules are missing, say so. Never call anything guaranteed safe. Say that the user should wait between posts and rewrite the post for each community instead of pasting the same text.\n"+
+"BODY: the full post text, following the writing rules. Only if the saved rules clearly require a flair or format, end the body with one line starting with 'Flair or format note:'. If they do not, leave that line out completely.\n"+
+"REPOST: suggest 3 to 5 communities where this post could also be shared. Use the communities with saved rules given below first, and say what to change for each (title, flair or format). Then add other real subreddits you know of that fit the topic, each marked 'rules not saved, check them first'. One line each: the community name and why it fits. Do not invent a subreddit you are not sure exists. Never call anything guaranteed safe. Say that the user should wait between posts and rewrite the post for each community instead of pasting the same text.\n"++
 "If the saved rules ban or restrict AI-written content, or no topic would respect the saved rules, write TITLE: None and BODY: None and explain why in REPOST.\n"+
 "Do not repeat a topic already generated in this chat or recently posted by the user. Do not copy any existing post. If the topic would need studies or numbers you cannot supply, choose a discussion or question style post instead of stating facts you cannot back up.";
 let chat=[];
@@ -201,7 +201,7 @@ function clearHist(){if(!confirm("Clear the whole activity history on this phone
 function markOk(){try{localStorage.setItem("rp_ai_ok",new Date().toISOString())}catch(e){}}
 function getOk(){try{return localStorage.getItem("rp_ai_ok")}catch(e){return null}}
 function greeting(){const h=new Date().getHours();return h<12?"Good morning.":(h<18?"Good afternoon.":"Good evening.")}
-function modelLabel(m){return m&&m.indexOf("lite")>-1?"Flash Lite":"Flash"}
+function modelLabel(m){if(m&&m.indexOf("workers")>-1)return "Backup AI";return m&&m.indexOf("lite")>-1?"Flash Lite":"Flash"}
 
 function slug(p){return p.toLowerCase().replace(/ /g,"-")}
 function currentPage(){
@@ -398,7 +398,7 @@ async function generatePost(){
   }else if(withR.length){
     others="There is no room to include other communities' rules this time. In REPOST, say that repost suggestions could not be checked and the user must read each community's rules.\n";
   }else{
-    others="No other community has saved rules. In REPOST, say that none can be suggested until the user saves their rules.\n";
+        others="No other community has saved rules. In REPOST, suggest real subreddits from your general knowledge and mark each one as rules not saved, check them first.\n";
   }
   const prompt=base+others+"\nGenerate now.";
   chat.push({role:"user",text:"Generate a post for r/"+sub+(extra?" - "+extra:""),sub:sub});
@@ -410,7 +410,7 @@ async function generatePost(){
     const res=await fetch(AGENT_URL,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({prompt:prompt})});
     const data=await res.json();
     if(!res.ok||data.error){throw new Error(data.error||("Error "+res.status))}
-    pend.text=data.text;pend.model=data.model;pend.pending=false;pend.shown=false;markOk();
+    pend.text=data.text;pend.model=data.source;pend.pending=false;pend.shown=false;markOk();
     pend.parsed=parseResult(data.text);
     if(pend.parsed&&lower(pend.parsed.title)!=="none"){addHist({type:"generated",sub:sub,title:pend.parsed.title})}
   }catch(e){
