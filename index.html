@@ -145,8 +145,16 @@ const GEN="The user pressed the Generate post button. They have not given an ide
 "REPOST: suggest 3 to 5 communities where this post could also be shared. Use the communities with saved rules given below first, and say what to change for each (title, flair or format). Then add other real subreddits you know of that fit the topic, each marked 'rules not saved, check them first'. One line each: the community name and why it fits. Do not invent a subreddit you are not sure exists. Never call anything guaranteed safe. Say that the user should wait between posts and rewrite the post for each community instead of pasting the same text.\n"+
 "If the saved rules ban or restrict AI-written content, or no topic would respect the saved rules, write TITLE: None and BODY: None and explain why in REPOST.\n"+
 "Do not repeat a topic already generated in this chat or recently posted by the user. Do not copy any existing post. If the topic would need studies or numbers you cannot supply, choose a discussion or question style post instead of stating facts you cannot back up.";
+const GENQ="The user pressed the Generate post button and chose QUESTION POST mode. They have not given an idea. A question post is only a title: one short, straightforward question in plain everyday words, like a real member asking the community. There is no body text. You choose one specific, original topic that fits this community and its saved rules, and prefer a topic that sparks real discussion.\n"+
+"FOR THIS REQUEST, ignore the RECOMMENDATION / WHY / RISKS / DRAFT format, the post length rule and the rule about not ending with a question. Reply with exactly three labelled parts and nothing else:\n"+
+"TITLE: the question, one sentence.\n"+
+"BODY: None\n"+
+"REPOST: suggest 3 to 5 communities where this question could also be asked. Use the communities with saved rules given below first, and say what to change for each. Then add other real subreddits you know of that fit the topic, each marked 'rules not saved, check them first'. One line each: the community name and why it fits. Do not invent a subreddit you are not sure exists. Never call anything guaranteed safe. Say that the user should wait between posts and reword the question for each community.\n"+
+"If the saved rules ban or restrict AI-written content, or do not allow plain question posts, or no question would respect the saved rules, write TITLE: None and BODY: None and explain why in REPOST.\n"+
+"Do not repeat a topic already generated in this chat or recently posted by the user. Do not state facts, studies or numbers you cannot back up.";
 let chat=[];
 let busy=false;
+let mode="normal";
 
 function esc(s){return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;")}
 function lower(x){return x.toLowerCase()}
@@ -244,6 +252,10 @@ function chatHTML(){
   '<div class="chead"><div><div class="mono">Community</div><button class="picker" id="picker" onclick="togglePicker()"></button></div><div class="plist" id="plist"></div><button class="link" onclick="newChat()">Clear</button></div>'+
   '<div class="log" id="log"></div>'+
   '<div class="cnote" id="cnote"></div>'+
+  '<div class="themes" style="margin:4px 0 10px">'+
+  '<button class="tbtn'+(mode==="normal"?' on':'')+'" onclick="setMode(\'normal\')">Normal post</button>'+
+  '<button class="tbtn'+(mode==="question"?' on':'')+'" onclick="setMode(\'question\')">Question post</button>'+
+  '</div>'+
   '<button class="gen" id="gen" onclick="generatePost()">Generate post</button>'+
   '<div class="inrow"><textarea class="cin" id="cin" rows="1" placeholder="Optional: add a direction, for example a subtopic to focus on"></textarea></div>'+
   '</div>';
@@ -275,6 +287,7 @@ function pickSub(s){
   updatePicker();drawLog();updateNote();
 }
 function newChat(){chat=[];drawLog()}
+function setMode(m){mode=m;render(true)}
 function copyText(text,btn){
   if(navigator.clipboard){navigator.clipboard.writeText(text).then(function(){btn.textContent="Copied"},function(){alert("Could not copy. Long-press the text to copy it.")})}
   else{alert("Could not copy. Long-press the text to copy it.")}
@@ -303,7 +316,7 @@ function resultBlock(m){
   m.shown=true;
   if(p.notes){const n=document.createElement("p");n.className="notes";n.textContent=p.notes;wrap.appendChild(n)}
   addSection(wrap,"Title",p.title,true);
-  addSection(wrap,"Body",p.body,true);
+  if(lower(p.body.replace(/[.\s]+$/,""))!=="none")addSection(wrap,"Body",p.body,true);
   addSection(wrap,"Where it could also be shared",p.repost,false);
   const f=document.createElement("div");f.className="mrow";
   const t=document.createElement("span");t.className="tag";t.textContent="Not posted";f.appendChild(t);
@@ -311,7 +324,10 @@ function resultBlock(m){
   (m.posted||[]).forEach(function(s){const pt=document.createElement("span");pt.className="tag ok";pt.textContent="Recorded: r/"+s;f.appendChild(pt)});
   if(lower(p.title)!=="none"){
     const sel=document.createElement("select");sel.className="mini";
-    getSubs().forEach(function(s){const o=document.createElement("option");o.value=s;o.textContent="r/"+s;if(s===m.sub)o.selected=true;sel.appendChild(o)});
+    const opts=[m.sub];const sug={};
+    (p.repost.match(/r\/[A-Za-z0-9_]{3,21}/g)||[]).forEach(function(x){const n=x.slice(2);if(!opts.map(lower).includes(lower(n))){opts.push(n);sug[n]=1}});
+    getSubs().forEach(function(s){if(!opts.map(lower).includes(lower(s)))opts.push(s)});
+    opts.forEach(function(s){const o=document.createElement("option");o.value=s;o.textContent="r/"+s+(sug[s]?" (suggested)":"");if(s===m.sub)o.selected=true;sel.appendChild(o)});
     const pb=document.createElement("button");pb.className="mini";pb.textContent="Mark as posted";
     pb.onclick=function(){markPosted(m,sel.value)};
     f.appendChild(sel);f.appendChild(pb);
@@ -374,7 +390,7 @@ async function generatePost(){
   if(!r){updateNote();return}
   const extra=document.getElementById("cin").value.trim();
   const head=pre(sub)+"SAVED RULES FOR r/"+sub+":\n"+r.text+"\n\n";
-  const mid=GEN+(extra?"\nExtra direction from the user: "+extra:"")+"\n\n";
+  const mid=(mode==="question"?GENQ:GEN)+(extra?"\nExtra direction from the user: "+extra:"")+"\n\n";
   const recent=loadHist().filter(function(h){return h.type==="posted"}).slice(0,3);
   const recentBlock=recent.length?"RECENT POSTS THE USER RECORDED (avoid repeating these topics):\n"+recent.map(function(h){return "- r/"+h.sub+", "+h.date.slice(0,10)+", "+String(h.title||"").slice(0,80)}).join("\n")+"\n\n":"";
   const titles=chat.filter(function(m){return m.role==="ai"&&m.parsed&&m.sub===sub&&lower(m.parsed.title)!=="none"}).slice(-5).map(function(m){return "- "+m.parsed.title.slice(0,80)});
@@ -398,7 +414,7 @@ async function generatePost(){
   }else if(withR.length){
     others="There is no room to include other communities' rules this time. In REPOST, say that repost suggestions could not be checked and the user must read each community's rules.\n";
   }else{
-        others="No other community has saved rules. In REPOST, suggest real subreddits from your general knowledge and mark each one as rules not saved, check them first.\n";
+    others="No other community has saved rules. In REPOST, suggest real subreddits from your general knowledge and mark each one as rules not saved, check them first.\n";
   }
   const prompt=base+others+"\nGenerate now.";
   chat.push({role:"user",text:"Generate a post for r/"+sub+(extra?" - "+extra:""),sub:sub});
